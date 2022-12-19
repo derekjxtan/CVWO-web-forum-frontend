@@ -1,8 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
-import counterReducer from '../features/counter/counterSlice';
+import thunk from 'redux-thunk';
+
+import postsReducer from '../reducers/postsSlice';
 
 export const store = configureStore({
   reducer: {
-    counter: counterReducer,
+    posts: postsReducer
   },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(thunk)
 });
