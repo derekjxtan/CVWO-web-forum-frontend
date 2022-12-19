@@ -27,7 +27,7 @@ export const Posts = () => {
                 <Card.Title className="d-flex justify-content-start">{post.title}</Card.Title>
                 <Row>
                     <Col className="d-flex justify-content-start">
-                        <Card.Subtitle>@{post.user.username}, {post.datetime}</Card.Subtitle>
+                        <Card.Subtitle>@{post.user.username}, {post.created_at}</Card.Subtitle>
                     </Col>
                     <Col className="d-flex justify-content-end">
                         <Card.Subtitle>Likes: 5, Dislikes: 10</Card.Subtitle>
@@ -68,7 +68,7 @@ export const Posts = () => {
 //         //             <Card.Title className="d-flex justify-content-start">{post.title}</Card.Title>
 //         //             <Row>
 //         //                 <Col className="d-flex justify-content-start">
-//         //                     <Card.Subtitle>@{post.username}, {post.datetime}</Card.Subtitle>
+//         //                     <Card.Subtitle>@{post.username}, {post.created_at}</Card.Subtitle>
 //         //                 </Col>
 //         //                 <Col className="d-flex justify-content-end">
 //         //                     <Card.Subtitle>Likes: 5, Dislikes: 10</Card.Subtitle>

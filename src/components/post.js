@@ -22,7 +22,7 @@ export const Post = () => {
     const repliesList = replies.map(reply => (
         <Container className="box" key={reply.id}>
             <Card.Text className="d-flex justify-content-start">{reply.body}</Card.Text>
-            <Card.Text className="d-flex justify-content-end">@user 2, {reply.datetime}</Card.Text>
+            <Card.Text className="d-flex justify-content-end">@{reply.user.username}, {reply.created_at}</Card.Text>
         </Container>
     ))
 
@@ -34,7 +34,7 @@ export const Post = () => {
                         <Card.Title className="d-flex justify-content-start">{post.title}</Card.Title>
                         <Row>
                             <Col className="d-flex justify-content-start">
-                                <Card.Subtitle>@{post.user.username}, {post.datetime}</Card.Subtitle>
+                                <Card.Subtitle>@{post.user.username}, {post.created_at}</Card.Subtitle>
                             </Col>
                             <Col className="d-flex justify-content-end">
                                 <Card.Subtitle>Likes: 5, Dislikes: 10</Card.Subtitle>
