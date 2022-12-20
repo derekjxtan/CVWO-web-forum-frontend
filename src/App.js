@@ -3,7 +3,7 @@ import React from 'react';
 import './App.css';
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 
-import Header from './components/header';
+import { Header } from './components/header';
 import { Posts } from './components/posts';
 import { Post } from './components/post';
 

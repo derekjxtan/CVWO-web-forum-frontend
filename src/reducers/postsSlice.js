@@ -70,7 +70,6 @@ export const { addPost } = postsSlice.actions
 
 export default postsSlice.reducer
 
-// TO BE IMPLEMENTED
 export const fetchPosts = () => (dispatch) => {
     fetch('http://localhost:3000/posts', {
         method: 'GET'
