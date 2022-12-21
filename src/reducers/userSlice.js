@@ -82,3 +82,35 @@ export const logout = () => (dispatch) => {
     localStorage.setItem('user', null);
     dispatch(removeUser())
 }
+
+// send request to register a new user to the backend
+export const register = (username, password) => (dispatch) => {
+    const registerDetails = {
+        username: username,
+        password: password
+    };
+    fetch('http://localhost:3000/users', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(registerDetails),
+        credentials: 'same-origin'
+    })
+    .then((response) => response.json())
+    .then((response) => {
+        if (response.username[0] === 'has already been taken') {
+            alert("Registration failed. Username has been taken");
+            var err = new Error('Username taken');
+            err.response = response;
+            throw err;
+        } else {
+            alert("Register Sucessfully. Log in to continue.");
+            // dispatch(addUser(response));
+        }
+    })
+    .catch((error) => {
+        // console.log(error);
+        alert('Registration could not be posted\n' + error.message);
+    })
+}

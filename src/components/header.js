@@ -10,7 +10,7 @@ import Button from 'react-bootstrap/Button';
 import Modal  from "react-bootstrap/Modal";
 import Form from 'react-bootstrap/Form';
 
-import { login, logout } from "../reducers/userSlice";
+import { login, logout, register } from "../reducers/userSlice";
 
 import { Link } from "react-router-dom";
 
@@ -34,9 +34,12 @@ export const Header = () => {
         dispatch(login(e.target[1].value, e.target[2].value));
     }
 
-    // TO BE IMPLEMENTED
-    const handleRegister = () => {
-        alert("Register loh");
+    // called when user attempts to register a new account
+    // dispatches register function from userSlice
+    const handleRegister = (e) => {
+        e.preventDefault();
+        // console.log(e.target[1].value, e.target[2].value);
+        dispatch(register(e.target[1].value, e.target[2].value));
     }
 
     // called when user attempts to log out
