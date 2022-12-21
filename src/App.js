@@ -6,18 +6,22 @@ import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import { Header } from './components/header';
 import { Posts } from './components/posts';
 import { Post } from './components/post';
+import { NewPostForm } from './components/newPostForm';
 
 
 function App({posts}) {
   return (
     <BrowserRouter>
       <div className="App">
-        <Header/>
+        <Header />
+        {/* <NewPostForm /> */}
         <Routes>
           <Route path='/' element={<Posts />} />
           <Route exact path='posts/:postId' element={<Post />} />
+          <Route exact path='/new' element={<NewPostForm />} />
           <Route path='*' element={<Navigate to='/' />} />
         </Routes>
+        
       </div>
     </BrowserRouter>
   );

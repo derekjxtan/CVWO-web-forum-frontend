@@ -94,3 +94,39 @@ export const fetchPosts = () => (dispatch) => {
         return err;
     })
 }
+
+export const postNewPost = (title, body, user_id) => (dispatch) => {
+    const newPost = {
+        title: title,
+        body: body,
+        user_id: user_id
+    }
+    fetch('http://localhost:3000/posts', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newPost),
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        // console.log(response);
+        if (response.ok) {
+            return response
+        } else {
+            var err = new Error('Error' + response.status + ": " + response.statusText);
+            err.response = response;
+            throw err;
+        }
+    })
+    .then(response => response.json())
+    .then(response => {
+        // console.log(response);
+        // dispatch(fetchPosts());
+        return response;
+    })
+    .catch((err) => {
+        console.log(err);
+        return err;
+    })
+}

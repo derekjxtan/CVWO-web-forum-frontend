@@ -12,6 +12,8 @@ import Form from 'react-bootstrap/Form';
 
 import { login } from "../reducers/userSlice";
 
+import { Link } from "react-router-dom";
+
 
 
 export const Header = () => {
@@ -57,7 +59,10 @@ export const Header = () => {
                         {
                             userStatus.isAuthenticated
                             ?
+                            <Nav>
+                                <Link to={`/new`} className='btn'>New Post</Link>
                                 <Nav.Link href='/saved'>Saved</Nav.Link>
+                            </Nav>
                             :
                                 <div />
                         }
