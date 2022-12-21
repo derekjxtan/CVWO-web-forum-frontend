@@ -10,7 +10,7 @@ import Button from 'react-bootstrap/Button';
 import Modal  from "react-bootstrap/Modal";
 import Form from 'react-bootstrap/Form';
 
-import { login } from "../reducers/userSlice";
+import { login, logout } from "../reducers/userSlice";
 
 import { Link } from "react-router-dom";
 
@@ -27,6 +27,8 @@ export const Header = () => {
     const toggleLogin = () => setLogin(!showLogin);
     const toggleRegister = () => setRegister(!showRegister);
 
+    // called when user attempts to log in
+    // dispatches login function from userSlice
     const loginUser = (e) => {
         e.preventDefault();
         dispatch(login(e.target[1].value, e.target[2].value));
@@ -35,6 +37,14 @@ export const Header = () => {
     // TO BE IMPLEMENTED
     const handleRegister = () => {
         alert("Register loh");
+    }
+
+    // called when user attempts to log out
+    // dispatches logout function from userSlice
+    const logoutUser = (e) => {
+        e.preventDefault();
+        dispatch(logout());
+        console.log(userStatus.isAuthenticated);
     }
 
     return (
@@ -73,6 +83,7 @@ export const Header = () => {
                         ?
                             <Nav className="ms-auto">
                                 <Nav.Link href="#profile">{userStatus.user.username}</Nav.Link>
+                                <Button variant="primary" className="" onClick={logoutUser}>Log out</Button>
                             </Nav>
                         :
                             <div>

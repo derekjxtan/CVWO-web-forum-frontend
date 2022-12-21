@@ -70,6 +70,7 @@ export const { addPost } = postsSlice.actions
 
 export default postsSlice.reducer
 
+// fetches all posts from backend and loads them into the store
 export const fetchPosts = () => (dispatch) => {
     fetch('http://localhost:3000/posts', {
         method: 'GET'
@@ -95,6 +96,7 @@ export const fetchPosts = () => (dispatch) => {
     })
 }
 
+// sends attempt to create new post to the backend
 export const postNewPost = (title, body, user_id) => (dispatch) => {
     const newPost = {
         title: title,

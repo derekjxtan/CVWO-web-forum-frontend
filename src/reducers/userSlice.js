@@ -12,14 +12,30 @@ const userSlice = createSlice({
     reducers: {
         addUser(state, action) {
             return {...state, isAuthenticated: true, user: action.payload}
+        },
+        removeUser(state) {
+            return {...state, isAuthenticated: false, user: null}
         }
     }
 })
 
-export const { addUser } = userSlice.actions
+export const { addUser, removeUser } = userSlice.actions
 
 export default userSlice.reducer
 
+// checks login status from local storage
+// loads stored data into the store if user has already logged in
+export const checkLogin = () => (dispatch) => {
+    const loginStatus = localStorage.getItem('isAuthenticated');
+    if (loginStatus === "true") {
+        // console.log("already logged in");
+        dispatch(addUser(JSON.parse(localStorage.getItem('user'))));
+    }
+    console.log("checkLogin Called");
+}
+
+// sends attempt to log in to the backend.
+// stores log in status to local storage to provide data persistence
 export const login = (username, password) => (dispatch) => {
     const loginDetails = {
         username: username,
@@ -45,10 +61,24 @@ export const login = (username, password) => (dispatch) => {
     .then((response) => response.json())
     .then((response) => {
         // console.log(response);
-        dispatch(addUser(response))
+        if (response === null) {
+            alert("Login failed. Username or password is wrong.")
+        } else {
+            localStorage.setItem('isAuthenticated', true);
+            localStorage.setItem('user', JSON.stringify(response));
+            dispatch(addUser(response));
+        }
     })
     .catch((error) => {
         console.log(error);
         alert('Login could not be posted\nError: ' + error.message);
     })
+}
+
+// logs user out from account
+// overrides data in the store and local storage
+export const logout = () => (dispatch) => {
+    localStorage.setItem('isAuthenticated', false);
+    localStorage.setItem('user', null);
+    dispatch(removeUser())
 }

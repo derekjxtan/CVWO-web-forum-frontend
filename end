@@ -1,0 +1,29 @@
+[33mcommit efb782bb17599299dbd13b307d5212337cdc8d0a[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m)[m
+Author: Derek Tan <derek.tan.jing.xu@gmail.com>
+Date:   Wed Dec 21 11:29:57 2022 +0800
+
+    added component to handle creation of new thread
+
+[33mcommit c1b550a16b82e302d954e0f8b1f6cbba6e53ec1f[m
+Author: Derek Tan <derek.tan.jing.xu@gmail.com>
+Date:   Tue Dec 20 21:05:56 2022 +0800
+
+    Refactored header.js into a functional component. Added userSlice to handle user status. Added basic logging in functionality
+
+[33mcommit 08570311fa4f9c2e1618d96ea86b5552ad269898[m
+Author: Derek Tan <derek.tan.jing.xu@gmail.com>
+Date:   Mon Dec 19 20:55:11 2022 +0800
+
+    added rendering of date and username for posts and replies
+
+[33mcommit 82bf24919d27aebd9546c6192fae77ce75f17876[m
+Author: Derek Tan <derek.tan.jing.xu@gmail.com>
+Date:   Mon Dec 19 16:11:20 2022 +0800
+
+    Added basic functionality for home page
+
+[33mcommit efa697e9b4d77c513859adb2af0bf4682a8a7267[m
+Author: Derek Tan <derek.tan.jing.xu@gmail.com>
+Date:   Sat Dec 17 11:55:04 2022 +0800
+
+    Initialize project using Create React App
