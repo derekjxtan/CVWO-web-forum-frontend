@@ -85,7 +85,7 @@ export const Header = () => {
                         userStatus.isAuthenticated
                         ?
                             <Nav className="ms-auto">
-                                <Nav.Link href="#profile">{userStatus.user.username}</Nav.Link>
+                                <Link to={`/users/${userStatus.user.id}`} className='btn'>{userStatus.user.username}</Link>
                                 <Button variant="primary" className="" onClick={logoutUser}>Log out</Button>
                             </Nav>
                         :
