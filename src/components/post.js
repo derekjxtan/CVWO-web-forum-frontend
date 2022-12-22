@@ -7,16 +7,20 @@ import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import { useParams } from "react-router-dom";
+
+import { postNewReply } from "../reducers/postsSlice";
 
 
 export const Post = () => {
     const params = useParams()
+    const dispatch = useDispatch()
 
     const postId = parseInt(params.postId)
     const post = useSelector(state => state.posts.posts.find(post => post.id === postId))
+    const userStatus = useSelector(state => state.user)
 
     const replies = post.replies
     const repliesList = replies.map(reply => (
@@ -25,6 +29,19 @@ export const Post = () => {
             <Card.Text className="d-flex justify-content-end">@{reply.user.username}, {reply.created_at}</Card.Text>
         </Container>
     ))
+
+    const postForm = (e) => {
+        alert(e.target[0].value)
+        if (userStatus.isAuthenticated) {
+            dispatch(postNewReply(
+                e.target[0].value,
+                userStatus.user.id,
+                postId
+            ));
+        } else {
+            alert("You are not logged in, login before trying again");
+        }
+    }
 
     return (
         <Col lg={8} className='d-inline-flex justify-content-center'>
@@ -56,7 +73,7 @@ export const Post = () => {
                             <Card.Text className="d-flex justify-content-end">@user 3, 13 Dec 21 9.05pm</Card.Text>
                         </Container> */}
                         <Container className="box">
-                            <Form>
+                            <Form onSubmit={postForm}>
                                 <Form.Group className="mb-3" controlId="formReply">
                                     <Row>
                                         <Form.Control type="text" placeholder="Reply to the post" required/>

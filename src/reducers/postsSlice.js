@@ -70,6 +70,9 @@ export const { addPost } = postsSlice.actions
 
 export default postsSlice.reducer
 
+
+// Functions for posts
+
 // fetches all posts from backend and loads them into the store
 export const fetchPosts = () => (dispatch) => {
     fetch('http://localhost:3000/posts', {
@@ -126,6 +129,102 @@ export const postNewPost = (title, body, user_id) => (dispatch) => {
         // console.log(response);
         // dispatch(fetchPosts());
         return response;
+    })
+    .catch((err) => {
+        console.log(err);
+        return err;
+    })
+}
+
+// sends attempt to delete a post to the backend
+export const deletePost = (post_id) => (dispatch) => {
+    fetch('http://localhost:3000/posts/' + post_id.toString(), {
+        method: 'DELETE'
+    })
+    .then(response => {
+        // console.log(response);
+        if (response.ok) {
+            alert("Post sucessfully deleted");
+            dispatch(fetchPosts());
+            return response
+        } else {
+            if (response.status === 404) {
+                alert("Post does not exist");
+            } else {
+                alert("Error deleting post")
+            }
+            var err = new Error('Error' + response.status + ": " + response.statusText);
+            err.response = response;
+            throw err;
+        }
+    })
+    .catch((err) => {
+        console.log(err);
+        return err;
+    })
+}
+
+
+// functions for replies
+
+// sends attempt to create new reply to the backend
+export const postNewReply = (body, user_id, post_id) => (dispatch) => {
+    const newReply = {
+        body: body,
+        user_id: user_id,
+        post_id: post_id
+    }
+    fetch('http://localhost:3000/replies', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newReply),
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        // console.log(response);
+        if (response.ok) {
+            return response
+        } else {
+            var err = new Error('Error' + response.status + ": " + response.statusText);
+            err.response = response;
+            throw err;
+        }
+    })
+    .then(response => response.json())
+    .then(response => {
+        console.log(response);
+        // dispatch(fetchPosts());
+        return response;
+    })
+    .catch((err) => {
+        console.log(err);
+        return err;
+    })
+}
+
+// sends attempt to delete a reply to the backend
+export const deleteReply = (reply_id) => (dispatch) => {
+    fetch('http://localhost:3000/replies/' + reply_id.toString(), {
+        method: 'DELETE'
+    })
+    .then(response => {
+        // console.log(response);
+        if (response.ok) {
+            alert("Reply sucessfully deleted");
+            dispatch(fetchPosts());
+            return response
+        } else {
+            if (response.status === 404) {
+                alert("Reply does not exist");
+            } else {
+                alert("Error deleting post")
+            }
+            var err = new Error('Error' + response.status + ": " + response.statusText);
+            err.response = response;
+            throw err;
+        }
     })
     .catch((err) => {
         console.log(err);

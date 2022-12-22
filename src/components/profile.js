@@ -5,6 +5,7 @@ import { Button, Container, Row, Card, Col } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
 import { useDispatch, useSelector } from "react-redux";
+import { deletePost, deleteReply } from "../reducers/postsSlice";
 
 
 export const Profile = () => {
@@ -26,14 +27,18 @@ export const Profile = () => {
         }
     }
 
-    // TO BE IMPLEMENTED
+    // called when attempting to delete a post
+    // dispatches deletePost function from postsSlice
     const handleDeletePost = (post_id) => {
-        alert("Deleting post " + post_id)
+        alert("Deleting post " + post_id);
+        dispatch(deletePost(post_id));
     }
 
-    // TO BE IMPLEMENTED
+    // called when attempting to delete a reply
+    // dispatches deleteReply function from postsSlice
     const handleDeleteReply = (reply_id) => {
-        alert("Deleting reply " + reply_id)
+        alert("Deleting reply " + reply_id);
+        dispatch(deleteReply(reply_id));
     }
 
     var postsList = (<div/>);
@@ -74,7 +79,7 @@ export const Profile = () => {
                     <Card.Text>{reply.body}</Card.Text>
                     <div className="d-flex justify-content-end">
                         <Link to={`/posts/${reply.post_id}`} className='btn btn-primary me-2'>See Post</Link>
-                        <Button variant="danger" onClick={() => handleDeletePost(reply.id)}>Delete</Button>
+                        <Button variant="danger" onClick={() => handleDeleteReply(reply.id)}>Delete</Button>
                     </div>
                 </Card.Body>
             </Card>
