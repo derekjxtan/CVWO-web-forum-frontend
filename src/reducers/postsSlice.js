@@ -99,6 +99,32 @@ export const fetchPosts = () => (dispatch) => {
     })
 }
 
+// fetch single post from backend
+export const fetchPost = (post_id) => (dispatch) => {
+    fetch('http://localhost:3000/posts/' + post_id.toString(), {
+        method: 'GET'
+    })
+    .then(response => {
+        // console.log(response);
+        if (response.ok) {
+            return response
+        } else {
+            var err = new Error('Error' + response.status + ": " + response.statusText);
+            err.response = response;
+            throw err;
+        }
+    })
+    .then(response => response.json())
+    .then(response => {
+        // console.log(response);
+        dispatch(addPost([response]));
+        return response;
+    })
+    .catch((err) => {
+        return err;
+    })
+}
+
 // sends attempt to create new post to the backend
 export const postNewPost = (title, body, user_id) => (dispatch) => {
     const newPost = {

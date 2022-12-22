@@ -1,19 +1,25 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { Button, Container, Row, Card, Col } from "react-bootstrap";
 
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 import { useDispatch, useSelector } from "react-redux";
 import { deletePost, deleteReply } from "../reducers/postsSlice";
+import { fetchUser } from "../reducers/userSlice";
 
 
 export const Profile = () => {
+    const params = useParams();
     const dispatch = useDispatch();
 
     const userStatus = useSelector(state => state.user)
 
     const [posts, setPosts] = useState(true);
+
+    useEffect(() => {
+        dispatch(fetchUser(parseInt(params.userId)));
+    }, [])
 
     const displayPosts = () => {
         if (!posts) {
@@ -83,23 +89,26 @@ export const Profile = () => {
                     </div>
                 </Card.Body>
             </Card>
-        ))
-    }
+        ));
 
-    return (
-        <Container className="col-8">
-            <h1>Profile</h1>
-            <h3>{userStatus.user.username}</h3>
-            {/* <h3>User1</h3> */}
-            <Button variant="primary" active={posts} onClick={displayPosts}>Posts</Button>
-            <Button variant="primary" active={!posts} className="ms-2" onClick={displayReplies}>Replies</Button>
-            {
-                posts
-                ?
-                    <div>{postsList}</div>
-                :
-                    <div>{repliesList}</div>
-            }
-        </Container>
-    )
+        return(
+            <Container className="col-8">
+                <h1>Profile</h1>
+                <h3>{userStatus.user.username}</h3>
+                <Button variant="primary" active={posts} onClick={displayPosts}>Posts</Button>
+                <Button variant="primary" active={!posts} className="ms-2" onClick={displayReplies}>Replies</Button>
+                {
+                    posts
+                    ?
+                        <div>{postsList}</div>
+                    :
+                        <div>{repliesList}</div>
+                }
+            </Container>
+        )
+    } else {
+        return (
+            <h1 className="mt-3">Login to View</h1>
+        )
+    }
 }
