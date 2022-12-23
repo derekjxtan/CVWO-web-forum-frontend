@@ -85,7 +85,7 @@ export const Header = () => {
                         userStatus.isAuthenticated
                         ?
                             <Nav className="ms-auto">
-                                <Link to={`/users/${userStatus.user.id}`} className='btn'>{userStatus.user.username}</Link>
+                                <Nav.Link href={`/users/${userStatus.user.id}`} className='btn me-2'>{userStatus.user.username}</Nav.Link>
                                 <Button variant="primary" className="" onClick={logoutUser}>Log out</Button>
                             </Nav>
                         :
@@ -107,7 +107,7 @@ export const Header = () => {
                                             </Form.Group>
                                             <Form.Group className="mb-3" controlId="formPassword">
                                                 <Form.Label>Password</Form.Label>
-                                                <Form.Control type="password" placeholder="Password"/>
+                                                <Form.Control type="password" placeholder="Password" required/>
                                             </Form.Group>
                                         </Modal.Body>
                                         <Modal.Footer>

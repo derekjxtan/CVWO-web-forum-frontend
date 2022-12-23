@@ -14,7 +14,7 @@ import { useDispatch } from 'react-redux';
 import { checkLogin } from './reducers/userSlice';
 
 
-function App({posts}) {
+function App() {
   const dispatch = useDispatch();
 
   // check login status whenever page is reloaded
@@ -33,7 +33,6 @@ function App({posts}) {
           <Route path='users/:userId' element={<Profile />} />
           <Route path='*' element={<Navigate to='/' />} />
         </Routes>
-        
       </div>
     </BrowserRouter>
   );

@@ -6,7 +6,7 @@ import { Link, useParams } from "react-router-dom";
 
 import { useDispatch, useSelector } from "react-redux";
 import { deletePost, deleteReply } from "../reducers/postsSlice";
-import { fetchUser } from "../reducers/userSlice";
+import { fetchProfile } from "../reducers/profileSlice";
 
 
 export const Profile = () => {
@@ -14,11 +14,12 @@ export const Profile = () => {
     const dispatch = useDispatch();
 
     const userStatus = useSelector(state => state.user)
+    const profile = useSelector(state => state.profile).profile
 
     const [posts, setPosts] = useState(true);
 
     useEffect(() => {
-        dispatch(fetchUser(parseInt(params.userId)));
+        dispatch(fetchProfile(parseInt(params.userId)));
     }, [])
 
     const displayPosts = () => {
@@ -49,9 +50,9 @@ export const Profile = () => {
 
     var postsList = (<div/>);
     var repliesList = (<div/>);
-
-    if (userStatus.isAuthenticated) {
-        postsList = userStatus.user.posts.map(post => (
+    
+    if (profile) {
+        postsList = profile.posts.map(post => (
             <Card className="mt-3" key={post.id}>
                 <Card.Header>
                     <Card.Title className="d-flex justify-content-start">{post.title}</Card.Title>
@@ -69,14 +70,32 @@ export const Profile = () => {
                     <Card.Text>{post.body.substring(0, 100)}</Card.Text>
                     <div className="d-flex justify-content-end">
                         {/* <Nav.Link href={'#'+post.id} className="me-2"><Button variant="primary">See full</Button></Nav.Link> */}
-                        <Link to={`/posts/${post.id}`} className='btn btn-primary me-2'>See full</Link>
-                        <Button variant="danger" onClick={() => handleDeletePost(post.id)}>Delete</Button>
+                        {/* <Link to={`/posts/${post.id}`} className='btn btn-primary me-2'>See full</Link>
+                        <Button variant="danger" onClick={() => handleDeletePost(post.id)}>Delete</Button> */}
+                        {
+                            !userStatus.isAuthenticated
+                            ?
+                                <Link to={`/posts/${post.id}`} className='btn btn-primary me-2'>See full</Link>
+                            : userStatus.user.id === profile.id
+                            ?
+                                <div>
+                                    <Link to={`/posts/${post.id}`} className='btn btn-primary me-2'>See full</Link>
+                                    <Button variant="danger" onClick={() => handleDeletePost(post.id)}>Delete</Button>
+                                </div>
+                            :
+                                <div>
+                                    <Button variant='success' className="me-2">Like</Button>
+                                    <Button variant='danger' className="me-2">Dislike</Button>
+                                    <Link to={`/posts/${post.id}`} className='btn btn-primary me-2'>See full</Link>
+                                    <Button variant='secondary'>Save</Button>
+                                </div>
+                        }
                     </div>
                 </Card.Body>
             </Card>
         ));
 
-        repliesList = userStatus.user.replies.map(reply => (
+        repliesList = profile.replies.map(reply => (
             <Card className="mt-3" key={reply.id}>
                 <Card.Header>
                     <Card.Subtitle className="d-flex justify-content-start">{reply.created_at}</Card.Subtitle>
@@ -94,7 +113,7 @@ export const Profile = () => {
         return(
             <Container className="col-8">
                 <h1>Profile</h1>
-                <h3>{userStatus.user.username}</h3>
+                <h3>{profile.username}</h3>
                 <Button variant="primary" active={posts} onClick={displayPosts}>Posts</Button>
                 <Button variant="primary" active={!posts} className="ms-2" onClick={displayReplies}>Replies</Button>
                 {

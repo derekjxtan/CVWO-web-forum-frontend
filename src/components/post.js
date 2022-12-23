@@ -9,7 +9,7 @@ import Row from "react-bootstrap/Row";
 
 import { useDispatch, useSelector } from "react-redux";
 
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 import { fetchPost, postNewReply } from "../reducers/postsSlice";
 
@@ -51,7 +51,9 @@ export const Post = () => {
         const repliesList = replies.map(reply => (
             <Container className="box" key={reply.id}>
                 <Card.Text className="d-flex justify-content-start">{reply.body}</Card.Text>
-                <Card.Text className="d-flex justify-content-end">@{reply.user.username}, {reply.created_at}</Card.Text>
+                <Card.Text className="d-flex justify-content-end">
+                    @<Link to={`/users/${reply.user.id}`}>{reply.user.username}</Link>, {reply.created_at}
+                </Card.Text>
             </Container>
         ))
         
@@ -63,7 +65,9 @@ export const Post = () => {
                             <Card.Title className="d-flex justify-content-start">{post.title}</Card.Title>
                             <Row>
                                 <Col className="d-flex justify-content-start">
-                                    <Card.Subtitle>@{post.user.username}, {post.created_at}</Card.Subtitle>
+                                    <Card.Subtitle>
+                                        @<Link to={`/users/${post.user.id}`}>{post.user.username}</Link>, {post.created_at}
+                                    </Card.Subtitle>
                                 </Col>
                                 <Col className="d-flex justify-content-end">
                                     <Card.Subtitle>Likes: 5, Dislikes: 10</Card.Subtitle>

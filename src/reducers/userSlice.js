@@ -4,6 +4,8 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
     isAuthenticated: false,
     user: null
+    // user_id: null,
+    // username: null
 }
 
 const userSlice = createSlice({
@@ -112,31 +114,5 @@ export const register = (username, password) => (dispatch) => {
     .catch((error) => {
         // console.log(error);
         alert('Registration could not be posted\n' + error.message);
-    })
-}
-
-// fetch single user from backend
-export const fetchUser = (user_id) => (dispatch) => {
-    fetch('http://localhost:3000/users/' + user_id.toString(), {
-        method: 'GET'
-    })
-    .then(response => {
-        // console.log(response);
-        if (response.ok) {
-            return response
-        } else {
-            var err = new Error('Error' + response.status + ": " + response.statusText);
-            err.response = response;
-            throw err;
-        }
-    })
-    .then(response => response.json())
-    .then(response => {
-        // console.log(response);
-        dispatch(addUser(response));
-        return response;
-    })
-    .catch((err) => {
-        return err;
     })
 }
