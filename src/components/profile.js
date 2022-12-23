@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 
-import { Button, Container, Row, Card, Col } from "react-bootstrap";
+import Button from 'react-bootstrap/Button';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Card from 'react-bootstrap/Card';
+import Col from 'react-bootstrap/Col';
 
 import { Link, useParams } from "react-router-dom";
 
@@ -69,9 +73,6 @@ export const Profile = () => {
                 <Card.Body>
                     <Card.Text>{post.body.substring(0, 100)}</Card.Text>
                     <div className="d-flex justify-content-end">
-                        {/* <Nav.Link href={'#'+post.id} className="me-2"><Button variant="primary">See full</Button></Nav.Link> */}
-                        {/* <Link to={`/posts/${post.id}`} className='btn btn-primary me-2'>See full</Link>
-                        <Button variant="danger" onClick={() => handleDeletePost(post.id)}>Delete</Button> */}
                         {
                             !userStatus.isAuthenticated
                             ?
@@ -80,6 +81,7 @@ export const Profile = () => {
                             ?
                                 <div>
                                     <Link to={`/posts/${post.id}`} className='btn btn-primary me-2'>See full</Link>
+                                    <Link to={`/posts/${post.id}/edit`} className='btn btn-success me-2'>Edit</Link>
                                     <Button variant="danger" onClick={() => handleDeletePost(post.id)}>Delete</Button>
                                 </div>
                             :

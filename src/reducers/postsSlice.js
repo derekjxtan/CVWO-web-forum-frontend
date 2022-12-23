@@ -162,6 +162,43 @@ export const postNewPost = (title, body, user_id) => (dispatch) => {
     })
 }
 
+// send attempt to edit post to the backend
+export const editPost = (post_id, title, body) => (dispatch) => {
+    const edits = {
+        title: title,
+        body: body,
+    }
+    fetch('http://localhost:3000/posts/' + post_id.toString(), {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(edits),
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        // console.log(response);
+        if (response.ok) {
+            return response
+        } else {
+            var err = new Error('Error' + response.status + ": " + response.statusText);
+            err.response = response;
+            throw err;
+        }
+    })
+    .then(response => response.json())
+    .then(response => {
+        // console.log(response);
+        // dispatch(fetchPosts());
+        alert("Post edited");
+        return response;
+    })
+    .catch((err) => {
+        console.log(err);
+        return err;
+    })
+}
+
 // sends attempt to delete a post to the backend
 export const deletePost = (post_id) => (dispatch) => {
     fetch('http://localhost:3000/posts/' + post_id.toString(), {

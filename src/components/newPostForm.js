@@ -16,6 +16,7 @@ export const NewPostForm = () => {
 
     const userStatus = useSelector(state => state.user)
 
+    // called when attempting to create a new post
     const postForm = (e) => {
         // console.log(e);
         // console.log(e.target[0].value, e.target[1].value, userStatus.user.id);

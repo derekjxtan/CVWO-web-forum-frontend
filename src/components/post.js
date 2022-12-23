@@ -28,6 +28,7 @@ export const Post = () => {
 
     const userStatus = useSelector(state => state.user)
 
+    // called when attempting to post a new reply
     const postForm = (e) => {
         alert(e.target[0].value)
         if (userStatus.isAuthenticated) {
