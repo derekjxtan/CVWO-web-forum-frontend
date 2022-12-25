@@ -9,6 +9,7 @@ import { Post } from './components/post';
 import { NewPostForm } from './components/newPostForm';
 import { Profile } from './components/profile';
 import { EditPostForm } from './components/editPostForm';
+import { Categories } from './components/categories';
 
 import { useDispatch } from 'react-redux';
 
@@ -33,6 +34,7 @@ function App() {
           <Route exact path='posts/:postId/edit' element={<EditPostForm />} />
           <Route exact path='/new' element={<NewPostForm />} />
           <Route path='users/:userId' element={<Profile />} />
+          <Route path='categories/:categories' element={<Categories />} />
           <Route path='*' element={<Navigate to='/' />} />
         </Routes>
       </div>

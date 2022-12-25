@@ -56,7 +56,6 @@ export const Posts = () => {
         return postCopy;
     }
 
-    // const postsList = posts.map(post => (
     const postsList = sortPosts().map(post => (
         <Card className="mt-3" key={post.id}>
             <Card.Header>
@@ -71,14 +70,13 @@ export const Posts = () => {
                         <Card.Subtitle>Likes: 5, Dislikes: 10</Card.Subtitle>
                     </Col>
                 </Row>
-                <Card.Subtitle className="d-flex justify-content-start mt-1">Tags: Fun, Games</Card.Subtitle>
+                <Card.Subtitle className="d-flex justify-content-start mt-1">Categories: {post.categories.reduce((x, y) => x + y + ", ", "").slice(0,-2)}</Card.Subtitle>
             </Card.Header>
             <Card.Body>
                 <Card.Text>{post.body.substring(0, 100)}</Card.Text>
                 <div className="d-flex justify-content-end">
                     <Button variant='success' className="me-2">Like</Button>
                     <Button variant='danger' className="me-2">Dislike</Button>
-                    {/* <Nav.Link href={'#'+post.id} className="me-2"><Button variant="primary">See full</Button></Nav.Link> */}
                     <Link to={`/posts/${post.id}`} className='btn btn-primary me-2'>See full</Link>
                     <Button variant='secondary'>Save</Button>
                 </div>
@@ -87,13 +85,6 @@ export const Posts = () => {
     ))
 
     return (
-        // <Col xs={8} className='d-inline-flex justify-content-center'>
-        //     <Row lg={1} className='d-inline-flex justify-content-center align-items-center'>
-        //         <Button variant="primary" onClick={sortDateAsc}>Date ASC</Button>
-        //         <Button variant="primary" onClick={sortDateDsc}>Date DSC</Button>
-        //         {postsList}
-        //     </Row>
-        // </Col>
         <Container className="col-8 mt-3">
             <Row>
                 <Container>

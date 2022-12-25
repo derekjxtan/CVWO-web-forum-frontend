@@ -12,12 +12,13 @@ import Form from 'react-bootstrap/Form';
 
 import { login, logout, register } from "../reducers/userSlice";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 
 
 export const Header = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const userStatus = useSelector(state => state.user)
 
@@ -47,7 +48,24 @@ export const Header = () => {
     const logoutUser = (e) => {
         e.preventDefault();
         dispatch(logout());
-        console.log(userStatus.isAuthenticated);
+    }
+
+    // format url and navigate to categories
+    const searchCategories = (e) => {
+        // console.log(e.target[0].value);
+        let categories = e.target[0].value.split(' ');
+        let path = `/categories/`;
+        for (let i = 0; i < categories.length; i++) {
+            const currCat = categories[i].trim();
+            if (currCat === "") {
+                continue;
+            }
+            path += currCat;
+            if (i !== categories.length - 1) {
+                path += '&';
+            }
+        }
+        navigate(path);
     }
 
     return (
@@ -85,12 +103,20 @@ export const Header = () => {
                         userStatus.isAuthenticated
                         ?
                             <Nav className="ms-auto">
+                                <Form className="d-flex me-3" onSubmit={searchCategories}>
+                                    <Form.Control type='search' placeholder="Search Categories" className="me-2" />
+                                    <Button variant="outline-success" type="submit">Search</Button>
+                                </Form>
                                 <Nav.Link href={`/users/${userStatus.user.id}`} className='btn me-2'>{userStatus.user.username}</Nav.Link>
                                 <Button variant="primary" className="" onClick={logoutUser}>Log out</Button>
                             </Nav>
                         :
                             <div>
                                 <Nav>
+                                    <Form className="d-flex me-3" onSubmit={searchCategories}>
+                                        <Form.Control type='search' placeholder="Search Categories" className="me-2" />
+                                        <Button variant="outline-success" type="submit">Search</Button>
+                                    </Form>
                                     <Button variant="primary" onClick={toggleLogin}>Log in</Button>
                                     <Button variant="primary" className="ms-1" onClick={toggleRegister}>Register</Button>
                                 </Nav>

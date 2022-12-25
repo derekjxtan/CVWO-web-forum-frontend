@@ -99,6 +99,32 @@ export const fetchPosts = () => (dispatch) => {
     })
 }
 
+// fetch posts by category from backend
+export const fetchPostsByCategory = (categories) => (dispatch) => {
+    fetch('http://localhost:3000/categories/' + categories, {
+        method: 'GET'
+    })
+    .then(response => {
+        // console.log(response);
+        if (response.ok) {
+            return response
+        } else {
+            var err = new Error('Error' + response.status + ": " + response.statusText);
+            err.response = response;
+            throw err;
+        }
+    })
+    .then(response => response.json())
+    .then(response => {
+        // console.log(response);
+        dispatch(addPost(response));
+        return response;
+    })
+    .catch((err) => {
+        return err;
+    })
+}
+
 // fetch single post from backend
 export const fetchPost = (post_id) => (dispatch) => {
     fetch('http://localhost:3000/posts/' + post_id.toString(), {
@@ -126,10 +152,20 @@ export const fetchPost = (post_id) => (dispatch) => {
 }
 
 // sends attempt to create new post to the backend
-export const postNewPost = (title, body, user_id) => (dispatch) => {
+export const postNewPost = (title, body, categories, user_id) => (dispatch) => {
+    // format categories, split string into array, remove blanks then remove whitespaces for individual entries
+    categories = categories.trim();
+    if (categories[categories.length - 1] === ',') {
+        categories = categories.slice(0, -1);
+    }
+    categories = categories.split(" ");
+    categories = categories.map(x => x.trim());
+    categories = categories.filter(x => x !== '');
+    // console.log(categories);
     const newPost = {
         title: title,
         body: body,
+        categories: categories,
         user_id: user_id
     }
     fetch('http://localhost:3000/posts', {
@@ -163,10 +199,20 @@ export const postNewPost = (title, body, user_id) => (dispatch) => {
 }
 
 // send attempt to edit post to the backend
-export const editPost = (post_id, title, body) => (dispatch) => {
+export const editPost = (post_id, title, body, categories) => (dispatch) => {
+    // format categories, split string into array, remove blanks then remove whitespaces for individual entries
+    categories = categories.trim();
+    if (categories[categories.length - 1] === ',') {
+        categories = categories.slice(0, -1);
+    }
+    categories = categories.split(" ");
+    categories = categories.map(x => x.trim());
+    categories = categories.filter(x => x !== '');
+    // console.log(categories);
     const edits = {
         title: title,
         body: body,
+        categories: categories
     }
     fetch('http://localhost:3000/posts/' + post_id.toString(), {
         method: 'PUT',
@@ -191,6 +237,7 @@ export const editPost = (post_id, title, body) => (dispatch) => {
         // console.log(response);
         // dispatch(fetchPosts());
         alert("Post edited");
+        console.log(response);
         return response;
     })
     .catch((err) => {

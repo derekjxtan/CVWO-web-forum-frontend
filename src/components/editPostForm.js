@@ -29,7 +29,7 @@ export const EditPostForm = () => {
     // called when attempting to edit a post
     const handleEdit = (e) => {
         // console.log(e.target[0].value, e.target[1].value);
-        dispatch(editPost(postId, e.target[0].value, e.target[1].value));
+        dispatch(editPost(postId, e.target[0].value, e.target[1].value, e.target[2].value));
         e.preventDefault();
     }
 
@@ -48,7 +48,8 @@ export const EditPostForm = () => {
                     </Form.Group>
                     <Form.Group className="mb-3" controlId="categories">
                         <Form.Label>Categories</Form.Label>
-                        <Form.Control type="text" placeholder="categories"/>
+                        <Form.Control type="text" placeholder="categories" defaultValue={post.categories.reduce((x, y) => x + y + " ", "")}/>
+                        <Form.Text className="float-start" muted>Enter categories separated with a space</Form.Text>
                     </Form.Group>
                     <Link to={`/posts/${postId}`} className='btn btn-secondary float-end'>Cancel</Link>
                     <Button variant="primary" className="float-end me-2" type="submit">

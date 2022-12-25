@@ -68,7 +68,7 @@ export const Profile = () => {
                             <Card.Subtitle>Likes: 5, Dislikes: 10</Card.Subtitle>
                         </Col>
                     </Row>
-                    <Card.Subtitle className="d-flex justify-content-start mt-1">Tags: Fun, Games</Card.Subtitle>
+                    <Card.Subtitle className="d-flex justify-content-start mt-1">Categories: {post.categories.reduce((x, y) => x + y + ", ", "").slice(0,-2)}</Card.Subtitle>
                 </Card.Header>
                 <Card.Body>
                     <Card.Text>{post.body.substring(0, 100)}</Card.Text>
