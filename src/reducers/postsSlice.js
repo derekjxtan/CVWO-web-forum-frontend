@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-
+import { addUser } from "./userSlice";
 
 const initialState = {
     posts: [
@@ -263,6 +263,227 @@ export const deletePost = (post_id) => (dispatch) => {
             } else {
                 alert("Error deleting post")
             }
+            var err = new Error('Error' + response.status + ": " + response.statusText);
+            err.response = response;
+            throw err;
+        }
+    })
+    .catch((err) => {
+        console.log(err);
+        return err;
+    })
+}
+
+// sends attempt to like a post
+export const likePost = (user_id, post_id, user) => (dispatch) => {
+    const newLike = {
+        user_id: user_id,
+        post_id: post_id
+    }
+    fetch('http://localhost:3000/like', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newLike),
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        // console.log(response);
+        if (response.ok) {
+            dispatch(fetchPosts());
+            return response
+        } else {
+            var err = new Error('Error' + response.status + ": " + response.statusText);
+            err.response = response;
+            throw err;
+        }
+    })
+    .then(response => response.json())
+    .then(response => {
+        user = JSON.parse(JSON.stringify(user))
+        if (Object.keys(response).length !== 0) {
+            user.liked.push(response);
+            user.disliked = user.disliked.filter(post => post.id !== post_id);
+            dispatch(addUser(user));
+        }
+        // console.log(response);
+    })
+    .catch((err) => {
+        console.log(err);
+        return err;
+    })
+}
+
+// sends attempt to unlike a post
+export const unlikePost = (user_id, post_id, user) => (dispatch) => {
+    const like = {
+        user_id: user_id,
+        post_id: post_id
+    }
+    fetch('http://localhost:3000/like', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(like),
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        if (response.ok) {
+            dispatch(fetchPosts());
+            user = JSON.parse(JSON.stringify(user))
+            user.liked = user.liked.filter(post => post.id !== post_id);
+            dispatch(addUser(user));
+            return response
+        } else {
+            var err = new Error('Error' + response.status + ": " + response.statusText);
+            err.response = response;
+            throw err;
+        }
+    })
+    .catch((err) => {
+        console.log(err);
+        return err;
+    })
+}
+
+// sends attempt to dislike a post
+export const dislikePost = (user_id, post_id, user) => (dispatch) => {
+    const newDislike = {
+        user_id: user_id,
+        post_id: post_id
+    }
+    fetch('http://localhost:3000/dislike', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newDislike),
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        // console.log(response);
+        if (response.ok) {
+            dispatch(fetchPosts());
+            return response
+        } else {
+            var err = new Error('Error' + response.status + ": " + response.statusText);
+            err.response = response;
+            throw err;
+        }
+    })
+    .then(response => response.json())
+    .then(response => {
+        user = JSON.parse(JSON.stringify(user))
+        if (Object.keys(response).length !== 0) {
+            user.disliked.push(response);
+            user.liked = user.liked.filter(post => post.id !== post_id);
+            dispatch(addUser(user));
+        }
+        // console.log(response);
+    })
+    .catch((err) => {
+        console.log(err);
+        return err;
+    })
+}
+
+// sends attempt to unlike a post
+export const undislikePost = (user_id, post_id, user) => (dispatch) => {
+    const dislike = {
+        user_id: user_id,
+        post_id: post_id
+    }
+    fetch('http://localhost:3000/dislike', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(dislike),
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        if (response.ok) {
+            dispatch(fetchPosts());
+            user = JSON.parse(JSON.stringify(user))
+            user.disliked = user.liked.filter(post => post.id !== post_id);
+            dispatch(addUser(user));
+            return response
+        } else {
+            var err = new Error('Error' + response.status + ": " + response.statusText);
+            err.response = response;
+            throw err;
+        }
+    })
+    .catch((err) => {
+        console.log(err);
+        return err;
+    })
+}
+
+// sends attempt to save a post
+export const savePost = (user_id, post_id, user) => (dispatch) => {
+    const newSave = {
+        user_id: user_id,
+        post_id: post_id
+    }
+    fetch('http://localhost:3000/save', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newSave),
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        // console.log(response);
+        if (response.ok) {
+            dispatch(fetchPosts());
+            return response
+        } else {
+            var err = new Error('Error' + response.status + ": " + response.statusText);
+            err.response = response;
+            throw err;
+        }
+    })
+    .then(response => response.json())
+    .then(response => {
+        user = JSON.parse(JSON.stringify(user))
+        if (Object.keys(response).length !== 0) {
+            user.saved.push(response);
+            dispatch(addUser(user));
+        }
+        // console.log(response);
+    })
+    .catch((err) => {
+        console.log(err);
+        return err;
+    })
+}
+
+// sends attempt to unlike a post
+export const unsavePost = (user_id, post_id, user) => (dispatch) => {
+    const save = {
+        user_id: user_id,
+        post_id: post_id
+    }
+    fetch('http://localhost:3000/save', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(save),
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        if (response.ok) {
+            dispatch(fetchPosts());
+            user = JSON.parse(JSON.stringify(user))
+            user.saved = user.saved.filter(post => post.id !== post_id);
+            dispatch(addUser(user));
+            return response
+        } else {
             var err = new Error('Error' + response.status + ": " + response.statusText);
             err.response = response;
             throw err;

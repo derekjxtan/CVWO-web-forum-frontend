@@ -13,15 +13,18 @@ const userSlice = createSlice({
     initialState,
     reducers: {
         addUser(state, action) {
+            localStorage.setItem('user', JSON.stringify(action.payload));
             return {...state, isAuthenticated: true, user: action.payload}
         },
         removeUser(state) {
+            localStorage.setItem('isAuthenticated', false);
+            localStorage.setItem('user', null);
             return {...state, isAuthenticated: false, user: null}
         }
     }
 })
 
-export const { addUser, removeUser } = userSlice.actions
+export const { addUser, removeUser, addLike, removeLike } = userSlice.actions
 
 export default userSlice.reducer
 
@@ -67,7 +70,6 @@ export const login = (username, password) => (dispatch) => {
             alert("Login failed. Username or password is wrong.")
         } else {
             localStorage.setItem('isAuthenticated', true);
-            localStorage.setItem('user', JSON.stringify(response));
             dispatch(addUser(response));
         }
     })
@@ -80,8 +82,6 @@ export const login = (username, password) => (dispatch) => {
 // logs user out from account
 // overrides data in the store and local storage
 export const logout = () => (dispatch) => {
-    localStorage.setItem('isAuthenticated', false);
-    localStorage.setItem('user', null);
     dispatch(removeUser())
 }
 

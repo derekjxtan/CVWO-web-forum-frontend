@@ -20,21 +20,39 @@ export const Profile = () => {
     const userStatus = useSelector(state => state.user)
     const profile = useSelector(state => state.profile).profile
 
-    const [posts, setPosts] = useState(true);
+    const [view, setView] = useState(0);
 
     useEffect(() => {
         dispatch(fetchProfile(parseInt(params.userId)));
     }, [])
 
     const displayPosts = () => {
-        if (!posts) {
-            setPosts(true);
+        if (view !== 0) {
+            setView(0);
         }
     }
 
     const displayReplies = () => {
-        if (posts) {
-            setPosts(false);
+        if (view !== 1) {
+            setView(1);
+        }
+    }
+
+    const displayLikes = () => {
+        if (view !== 2) {
+            setView(2);
+        }
+    }
+
+    const displayDislikes = () => {
+        if (view !== 3) {
+            setView(3);
+        }
+    }
+
+    const displaySaves = () => {
+        if (view !== 4) {
+            setView(4);
         }
     }
 
@@ -52,11 +70,12 @@ export const Profile = () => {
         dispatch(deleteReply(reply_id));
     }
 
-    var postsList = (<div/>);
-    var repliesList = (<div/>);
-    
-    if (profile) {
-        postsList = profile.posts.map(post => (
+    var likesList = <div />
+    var dislikesList = <div />
+    var savesList = <div />
+
+    if (userStatus.isAuthenticated && profile) {
+        likesList = userStatus.user.liked.map(post => (
             <Card className="mt-3" key={post.id}>
                 <Card.Header>
                     <Card.Title className="d-flex justify-content-start">{post.title}</Card.Title>
@@ -65,7 +84,87 @@ export const Profile = () => {
                             <Card.Subtitle>{post.created_at}</Card.Subtitle>
                         </Col>
                         <Col className="d-flex justify-content-end">
-                            <Card.Subtitle>Likes: 5, Dislikes: 10</Card.Subtitle>
+                            <Card.Subtitle>Likes: {post.likes}, Dislikes: {post.dislikes}</Card.Subtitle>
+                        </Col>
+                    </Row>
+                    <Card.Subtitle className="d-flex justify-content-start mt-1">Categories: {post.categories.reduce((x, y) => x + y + ", ", "").slice(0,-2)}</Card.Subtitle>
+                </Card.Header>
+                <Card.Body>
+                    <Card.Text>{post.body.substring(0, 100)}</Card.Text>
+                    <div className="d-flex justify-content-end">
+                        <Button variant='success' className="me-2">Like</Button>
+                        <Button variant='danger' className="me-2">Dislike</Button>
+                        <Link to={`/posts/${post.id}`} className='btn btn-primary me-2'>See full</Link>
+                        <Button variant='secondary'>Save</Button>
+                    </div>
+                </Card.Body>
+            </Card>
+        ));
+
+        dislikesList = userStatus.user.disliked.map(post => (
+            <Card className="mt-3" key={post.id}>
+                <Card.Header>
+                    <Card.Title className="d-flex justify-content-start">{post.title}</Card.Title>
+                    <Row>
+                        <Col className="d-flex justify-content-start">
+                            <Card.Subtitle>{post.created_at}</Card.Subtitle>
+                        </Col>
+                        <Col className="d-flex justify-content-end">
+                            <Card.Subtitle>Likes: {post.likes}, Dislikes: {post.dislikes}</Card.Subtitle>
+                        </Col>
+                    </Row>
+                    <Card.Subtitle className="d-flex justify-content-start mt-1">Categories: {post.categories.reduce((x, y) => x + y + ", ", "").slice(0,-2)}</Card.Subtitle>
+                </Card.Header>
+                <Card.Body>
+                    <Card.Text>{post.body.substring(0, 100)}</Card.Text>
+                    <div className="d-flex justify-content-end">
+                        <Button variant='success' className="me-2">Like</Button>
+                        <Button variant='danger' className="me-2">Dislike</Button>
+                        <Link to={`/posts/${post.id}`} className='btn btn-primary me-2'>See full</Link>
+                        <Button variant='secondary'>Save</Button>
+                    </div>
+                </Card.Body>
+            </Card>
+        ));
+
+        savesList = userStatus.user.saved.map(post => (
+            <Card className="mt-3" key={post.id}>
+                <Card.Header>
+                    <Card.Title className="d-flex justify-content-start">{post.title}</Card.Title>
+                    <Row>
+                        <Col className="d-flex justify-content-start">
+                            <Card.Subtitle>{post.created_at}</Card.Subtitle>
+                        </Col>
+                        <Col className="d-flex justify-content-end">
+                            <Card.Subtitle>Likes: {post.likes}, Dislikes: {post.dislikes}</Card.Subtitle>
+                        </Col>
+                    </Row>
+                    <Card.Subtitle className="d-flex justify-content-start mt-1">Categories: {post.categories.reduce((x, y) => x + y + ", ", "").slice(0,-2)}</Card.Subtitle>
+                </Card.Header>
+                <Card.Body>
+                    <Card.Text>{post.body.substring(0, 100)}</Card.Text>
+                    <div className="d-flex justify-content-end">
+                        <Button variant='success' className="me-2">Like</Button>
+                        <Button variant='danger' className="me-2">Dislike</Button>
+                        <Link to={`/posts/${post.id}`} className='btn btn-primary me-2'>See full</Link>
+                        <Button variant='secondary'>Save</Button>
+                    </div>
+                </Card.Body>
+            </Card>
+        ));
+    }
+    
+    if (profile) {
+        const postsList = profile.posts.map(post => (
+            <Card className="mt-3" key={post.id}>
+                <Card.Header>
+                    <Card.Title className="d-flex justify-content-start">{post.title}</Card.Title>
+                    <Row>
+                        <Col className="d-flex justify-content-start">
+                            <Card.Subtitle>{post.created_at}</Card.Subtitle>
+                        </Col>
+                        <Col className="d-flex justify-content-end">
+                            <Card.Subtitle>Likes: {post.likes}, Dislikes: {post.dislikes}</Card.Subtitle>
                         </Col>
                     </Row>
                     <Card.Subtitle className="d-flex justify-content-start mt-1">Categories: {post.categories.reduce((x, y) => x + y + ", ", "").slice(0,-2)}</Card.Subtitle>
@@ -97,7 +196,7 @@ export const Profile = () => {
             </Card>
         ));
 
-        repliesList = profile.replies.map(reply => (
+        const repliesList = profile.replies.map(reply => (
             <Card className="mt-3" key={reply.id}>
                 <Card.Header>
                     <Card.Subtitle className="d-flex justify-content-start">{reply.created_at}</Card.Subtitle>
@@ -116,14 +215,37 @@ export const Profile = () => {
             <Container className="col-8">
                 <h1>Profile</h1>
                 <h3>{profile.username}</h3>
-                <Button variant="primary" active={posts} onClick={displayPosts}>Posts</Button>
-                <Button variant="primary" active={!posts} className="ms-2" onClick={displayReplies}>Replies</Button>
                 {
-                    posts
+                    profile.id === userStatus.user.id
+                    ?
+                        <div>
+                            <Button variant="primary" active={view} onClick={displayPosts}>Posts</Button>
+                            <Button variant="primary" active={!view} className="ms-2" onClick={displayReplies}>Replies</Button>
+                            <Button variant="primary" className="ms-2" onClick={displayLikes}>Liked</Button>
+                            <Button variant="primary" className="ms-2" onClick={displayDislikes}>Disliked</Button>
+                            <Button variant="primary" className="ms-2" onClick={displaySaves}>Saved</Button>
+                        </div>
+                    :  
+                        <div>
+                            <Button variant="primary" active={view} onClick={displayPosts}>Posts</Button>
+                            <Button variant="primary" active={!view} className="ms-2" onClick={displayReplies}>Replies</Button>
+                        </div>
+                }
+                {
+                    view === 0
                     ?
                         <div>{postsList}</div>
-                    :
+                    : view === 1
+                    ?
                         <div>{repliesList}</div>
+                    : view === 2
+                    ?
+                        <div>{likesList}</div>
+                    : view === 3
+                    ?
+                        <div>{dislikesList}</div>
+                    :
+                        <div>{savesList}</div>
                 }
             </Container>
         )

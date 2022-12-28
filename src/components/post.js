@@ -71,7 +71,7 @@ export const Post = () => {
                                     </Card.Subtitle>
                                 </Col>
                                 <Col className="d-flex justify-content-end">
-                                    <Card.Subtitle>Likes: 5, Dislikes: 10</Card.Subtitle>
+                                    <Card.Subtitle>Likes: {post.likes}, Dislikes: {post.dislikes}</Card.Subtitle>
                                 </Col>
                             </Row>
                             <Card.Subtitle className="d-flex justify-content-start mt-1">Categories: {post.categories.reduce((x, y) => x + y + ", ", "").slice(0,-2)}</Card.Subtitle>
