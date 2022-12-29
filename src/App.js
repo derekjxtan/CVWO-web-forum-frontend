@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
-// import logo from './logo.svg';
+
 import './App.css';
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 
 import { Header } from './components/header';
-import { Posts } from './components/posts';
+import { HomePage } from './components/homePage';
 import { Post } from './components/post';
 import { NewPostForm } from './components/newPostForm';
 import { Profile } from './components/profile';
@@ -14,6 +14,7 @@ import { Categories } from './components/categories';
 import { useDispatch } from 'react-redux';
 
 import { checkLogin } from './reducers/userSlice';
+import { Posts } from './components/posts';
 
 
 function App() {
@@ -29,7 +30,8 @@ function App() {
       <div className="App">
         <Header />
         <Routes>
-          <Route path='/' element={<Posts />} />
+          <Route path='/' element={<HomePage />} />
+          {/* <Route path='/' element={<Posts />} /> */}
           <Route exact path='posts/:postId' element={<Post />} />
           <Route exact path='posts/:postId/edit' element={<EditPostForm />} />
           <Route exact path='/new' element={<NewPostForm />} />
