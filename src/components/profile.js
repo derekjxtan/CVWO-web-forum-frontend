@@ -5,7 +5,9 @@ import Button from 'react-bootstrap/Button';
 import { useParams } from "react-router-dom";
 
 import { useDispatch, useSelector } from "react-redux";
+
 import { fetchProfile } from "../reducers/profileSlice";
+
 import { Posts } from "./posts";
 import { Replies } from "./replies";
 
@@ -77,7 +79,7 @@ export const Profile = () => {
                 {
                     view === 0
                     ?
-                        <Posts posts={profile.posts} />
+                        <Posts posts={profile.posts} profile_id={profile.id}/>
                     : view === 1
                     ?
                         <Replies replies={profile.replies} />

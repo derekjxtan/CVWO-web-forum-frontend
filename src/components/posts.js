@@ -20,7 +20,7 @@ const SinglePost = (props) => {
     const [save, setSave] = useState(userStatus.user.saved.find(item => item.id === post.id) === undefined);
 
     const handleLike = () => {
-        props.handleLike(props.post.id);
+        props.handleLike(props.post.id, like);
         if (like && !dislike) {
             setDislike(true);
         }
@@ -28,7 +28,7 @@ const SinglePost = (props) => {
     }
 
     const handleDislike = () => {
-        props.handleDislike(props.post.id);
+        props.handleDislike(props.post.id, dislike);
         if (dislike & !like) {
             setLike(true);
         }
@@ -36,7 +36,7 @@ const SinglePost = (props) => {
     }
 
     const handleSave = () => {
-        props.handleSave(props.post.id);
+        props.handleSave(props.post.id, save);
         setSave(!save);
     }
 
@@ -137,29 +137,29 @@ export const Posts = (props) => {
     }
 
     // checks whether post has already been liked by user. If so call likePost, otherwise call unlikePost
-    const handleLike = (post_id) => {
-        if (userStatus.user.liked.find(post => post.id === post_id) === undefined) {
-            dispatch(likePost(userStatus.user.id, post_id, userStatus.user));
+    const handleLike = (post_id, like) => {
+        if (like) {
+            dispatch(likePost(userStatus.user.id, post_id, userStatus.user, props.categories, props.profile_id));
         } else {
-            dispatch(unlikePost(userStatus.user.id, post_id, userStatus.user));
+            dispatch(unlikePost(userStatus.user.id, post_id, userStatus.user, props.categories, props.profile_id));
         }
     }
 
     // checks whether post has already been disliked by user. If so call dislikePost, otherwise call undislikePost
-    const handleDislike = (post_id) => {
-        if (userStatus.user.disliked.find(post => post.id === post_id) === undefined) {
-            dispatch(dislikePost(userStatus.user.id, post_id, userStatus.user));
+    const handleDislike = (post_id, dislike) => {
+        if (dislike) {
+            dispatch(dislikePost(userStatus.user.id, post_id, userStatus.user, props.categories, props.profile_id));
         } else {
-            dispatch(undislikePost(userStatus.user.id, post_id, userStatus.user));
+            dispatch(undislikePost(userStatus.user.id, post_id, userStatus.user, props.categories, props.profile_id));
         }
     }
 
     // checks whether post has already been saved by user. If so call savePost, otherwise call unsavePost
-    const handleSave = (post_id) => {
-        if (userStatus.user.saved.find(post => post.id === post_id) === undefined) {
-            dispatch(savePost(userStatus.user.id, post_id, userStatus.user));
+    const handleSave = (post_id, save) => {
+        if (save) {
+            dispatch(savePost(userStatus.user.id, post_id, userStatus.user, props.categories, props.profile_id));
         } else {
-            dispatch(unsavePost(userStatus.user.id, post_id, userStatus.user));
+            dispatch(unsavePost(userStatus.user.id, post_id, userStatus.user, props.categories, props.profile_id));
         }
     }
 

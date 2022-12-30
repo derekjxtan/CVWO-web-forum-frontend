@@ -1,4 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
+
+import { fetchProfile } from "./profileSlice";
+
 import { addUser } from "./userSlice";
 
 const initialState = {
@@ -121,6 +124,7 @@ export const fetchPostsByCategory = (categories) => (dispatch) => {
         return response;
     })
     .catch((err) => {
+        console.log(err);
         return err;
     })
 }
@@ -275,7 +279,7 @@ export const deletePost = (post_id) => (dispatch) => {
 }
 
 // sends attempt to like a post
-export const likePost = (user_id, post_id, user) => (dispatch) => {
+export const likePost = (user_id, post_id, user, categories = null, profile_id = null) => (dispatch) => {
     const newLike = {
         user_id: user_id,
         post_id: post_id
@@ -291,7 +295,14 @@ export const likePost = (user_id, post_id, user) => (dispatch) => {
     .then(response => {
         // console.log(response);
         if (response.ok) {
-            dispatch(fetchPosts());
+            if (categories !== null) {
+                dispatch(fetchPostsByCategory(categories));
+            } else if (profile_id !== null) {
+                dispatch(fetchProfile(profile_id));
+            } else {
+                dispatch(fetchPosts());
+            }
+            // dispatch(fetchPosts());
             return response
         } else {
             var err = new Error('Error' + response.status + ": " + response.statusText);
@@ -316,7 +327,7 @@ export const likePost = (user_id, post_id, user) => (dispatch) => {
 }
 
 // sends attempt to unlike a post
-export const unlikePost = (user_id, post_id, user) => (dispatch) => {
+export const unlikePost = (user_id, post_id, user, categories = null, profile_id = null) => (dispatch) => {
     const like = {
         user_id: user_id,
         post_id: post_id
@@ -331,7 +342,13 @@ export const unlikePost = (user_id, post_id, user) => (dispatch) => {
     })
     .then(response => {
         if (response.ok) {
-            dispatch(fetchPosts());
+            if (categories !== null) {
+                dispatch(fetchPostsByCategory(categories));
+            } else if (profile_id !== null) {
+                dispatch(fetchProfile(profile_id));
+            } else {
+                dispatch(fetchPosts());
+            }
             user = JSON.parse(JSON.stringify(user))
             user.liked = user.liked.filter(post => post.id !== post_id);
             dispatch(addUser(user));
@@ -349,7 +366,7 @@ export const unlikePost = (user_id, post_id, user) => (dispatch) => {
 }
 
 // sends attempt to dislike a post
-export const dislikePost = (user_id, post_id, user) => (dispatch) => {
+export const dislikePost = (user_id, post_id, user, categories = null, profile_id = null) => (dispatch) => {
     const newDislike = {
         user_id: user_id,
         post_id: post_id
@@ -365,7 +382,13 @@ export const dislikePost = (user_id, post_id, user) => (dispatch) => {
     .then(response => {
         // console.log(response);
         if (response.ok) {
-            dispatch(fetchPosts());
+            if (categories !== null) {
+                dispatch(fetchPostsByCategory(categories));
+            } else if (profile_id !== null) {
+                dispatch(fetchProfile(profile_id));
+            } else {
+                dispatch(fetchPosts());
+            }
             return response
         } else {
             var err = new Error('Error' + response.status + ": " + response.statusText);
@@ -390,7 +413,7 @@ export const dislikePost = (user_id, post_id, user) => (dispatch) => {
 }
 
 // sends attempt to unlike a post
-export const undislikePost = (user_id, post_id, user) => (dispatch) => {
+export const undislikePost = (user_id, post_id, user, categories = null, profile_id = null) => (dispatch) => {
     const dislike = {
         user_id: user_id,
         post_id: post_id
@@ -405,7 +428,13 @@ export const undislikePost = (user_id, post_id, user) => (dispatch) => {
     })
     .then(response => {
         if (response.ok) {
-            dispatch(fetchPosts());
+            if (categories !== null) {
+                dispatch(fetchPostsByCategory(categories));
+            } else if (profile_id !== null) {
+                dispatch(fetchProfile(profile_id));
+            } else {
+                dispatch(fetchPosts());
+            }
             user = JSON.parse(JSON.stringify(user))
             user.disliked = user.liked.filter(post => post.id !== post_id);
             dispatch(addUser(user));
@@ -423,7 +452,7 @@ export const undislikePost = (user_id, post_id, user) => (dispatch) => {
 }
 
 // sends attempt to save a post
-export const savePost = (user_id, post_id, user) => (dispatch) => {
+export const savePost = (user_id, post_id, user, categories = null, profile_id = null) => (dispatch) => {
     const newSave = {
         user_id: user_id,
         post_id: post_id
@@ -439,7 +468,13 @@ export const savePost = (user_id, post_id, user) => (dispatch) => {
     .then(response => {
         // console.log(response);
         if (response.ok) {
-            dispatch(fetchPosts());
+            if (categories !== null) {
+                dispatch(fetchPostsByCategory(categories));
+            } else if (profile_id !== null) {
+                dispatch(fetchProfile(profile_id));
+            } else {
+                dispatch(fetchPosts());
+            }
             return response
         } else {
             var err = new Error('Error' + response.status + ": " + response.statusText);
@@ -463,7 +498,7 @@ export const savePost = (user_id, post_id, user) => (dispatch) => {
 }
 
 // sends attempt to unlike a post
-export const unsavePost = (user_id, post_id, user) => (dispatch) => {
+export const unsavePost = (user_id, post_id, user, categories = null, profile_id = null) => (dispatch) => {
     const save = {
         user_id: user_id,
         post_id: post_id
@@ -478,7 +513,13 @@ export const unsavePost = (user_id, post_id, user) => (dispatch) => {
     })
     .then(response => {
         if (response.ok) {
-            dispatch(fetchPosts());
+            if (categories !== null) {
+                dispatch(fetchPostsByCategory(categories));
+            } else if (profile_id !== null) {
+                dispatch(fetchProfile(profile_id));
+            } else {
+                dispatch(fetchPosts());
+            }
             user = JSON.parse(JSON.stringify(user))
             user.saved = user.saved.filter(post => post.id !== post_id);
             dispatch(addUser(user));
