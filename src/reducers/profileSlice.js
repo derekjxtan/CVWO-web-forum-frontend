@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { baseUrl } from "./baseUrl";
 
 
 const initialState = {
@@ -24,8 +25,12 @@ export default profileSlice.reducer
 
 // fetch single profile from backend
 export const fetchProfile = (user_id) => (dispatch) => {
-    fetch('http://localhost:3000/users/' + user_id.toString(), {
-        method: 'GET'
+    const token = 'Bearer ' + localStorage.getItem('token');
+    fetch(baseUrl + 'users/' + user_id.toString(), {
+        method: 'GET',
+        headers: {
+            'Authorization': token
+        }
     })
     .then(response => {
         // console.log(response);

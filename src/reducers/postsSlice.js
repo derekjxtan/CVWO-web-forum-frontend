@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { baseUrl } from "./baseUrl";
 
 import { fetchProfile } from "./profileSlice";
 
@@ -78,7 +79,7 @@ export default postsSlice.reducer
 
 // fetches all posts from backend and loads them into the store
 export const fetchPosts = () => (dispatch) => {
-    fetch('http://localhost:3000/posts', {
+    fetch(baseUrl + 'posts', {
         method: 'GET'
     })
     .then(response => {
@@ -104,7 +105,7 @@ export const fetchPosts = () => (dispatch) => {
 
 // fetch posts by category from backend
 export const fetchPostsByCategory = (categories) => (dispatch) => {
-    fetch('http://localhost:3000/categories/' + categories, {
+    fetch(baseUrl + 'categories/' + categories, {
         method: 'GET'
     })
     .then(response => {
@@ -131,7 +132,7 @@ export const fetchPostsByCategory = (categories) => (dispatch) => {
 
 // fetch single post from backend
 export const fetchPost = (post_id) => (dispatch) => {
-    fetch('http://localhost:3000/posts/' + post_id.toString(), {
+    fetch(baseUrl + 'posts/' + post_id.toString(), {
         method: 'GET'
     })
     .then(response => {
@@ -166,15 +167,17 @@ export const postNewPost = (title, body, categories, user_id) => (dispatch) => {
     categories = categories.map(x => x.trim());
     categories = categories.filter(x => x !== '');
     // console.log(categories);
+    const token = 'Bearer ' + localStorage.getItem('token');
     const newPost = {
         title: title,
         body: body,
         categories: categories,
         user_id: user_id
     }
-    fetch('http://localhost:3000/posts', {
+    fetch(baseUrl + 'posts', {
         method: 'POST',
         headers: {
+            'Authorization': token,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(newPost),
@@ -213,14 +216,16 @@ export const editPost = (post_id, title, body, categories) => (dispatch) => {
     categories = categories.map(x => x.trim());
     categories = categories.filter(x => x !== '');
     // console.log(categories);
+    const token = 'Bearer ' + localStorage.getItem('token');
     const edits = {
         title: title,
         body: body,
         categories: categories
     }
-    fetch('http://localhost:3000/posts/' + post_id.toString(), {
+    fetch(baseUrl + 'posts/' + post_id.toString(), {
         method: 'PUT',
         headers: {
+            'Authorization': token,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(edits),
@@ -252,8 +257,12 @@ export const editPost = (post_id, title, body, categories) => (dispatch) => {
 
 // sends attempt to delete a post to the backend
 export const deletePost = (post_id) => (dispatch) => {
-    fetch('http://localhost:3000/posts/' + post_id.toString(), {
-        method: 'DELETE'
+    const token = 'Bearer ' + localStorage.getItem('token');
+    fetch(baseUrl + 'posts/' + post_id.toString(), {
+        method: 'DELETE',
+        headers: {
+            'Authorization': token
+        }
     })
     .then(response => {
         // console.log(response);
@@ -280,13 +289,15 @@ export const deletePost = (post_id) => (dispatch) => {
 
 // sends attempt to like a post
 export const likePost = (user_id, post_id, user, categories = null, profile_id = null) => (dispatch) => {
+    const token = 'Bearer ' + localStorage.getItem('token');
     const newLike = {
         user_id: user_id,
         post_id: post_id
     }
-    fetch('http://localhost:3000/like', {
+    fetch(baseUrl + 'like', {
         method: 'POST',
         headers: {
+            'Authorization': token,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(newLike),
@@ -316,7 +327,7 @@ export const likePost = (user_id, post_id, user, categories = null, profile_id =
         if (Object.keys(response).length !== 0) {
             user.liked.push(response);
             user.disliked = user.disliked.filter(post => post.id !== post_id);
-            dispatch(addUser(user));
+            dispatch(addUser({user: user}));
         }
         // console.log(response);
     })
@@ -328,13 +339,15 @@ export const likePost = (user_id, post_id, user, categories = null, profile_id =
 
 // sends attempt to unlike a post
 export const unlikePost = (user_id, post_id, user, categories = null, profile_id = null) => (dispatch) => {
+    const token = 'Bearer ' + localStorage.getItem('token');
     const like = {
         user_id: user_id,
         post_id: post_id
     }
-    fetch('http://localhost:3000/like', {
+    fetch(baseUrl + 'like', {
         method: 'DELETE',
         headers: {
+            'Authorization': token,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(like),
@@ -351,7 +364,7 @@ export const unlikePost = (user_id, post_id, user, categories = null, profile_id
             }
             user = JSON.parse(JSON.stringify(user))
             user.liked = user.liked.filter(post => post.id !== post_id);
-            dispatch(addUser(user));
+            dispatch(addUser({user: user}));
             return response
         } else {
             var err = new Error('Error' + response.status + ": " + response.statusText);
@@ -367,13 +380,15 @@ export const unlikePost = (user_id, post_id, user, categories = null, profile_id
 
 // sends attempt to dislike a post
 export const dislikePost = (user_id, post_id, user, categories = null, profile_id = null) => (dispatch) => {
+    const token = 'Bearer ' + localStorage.getItem('token');
     const newDislike = {
         user_id: user_id,
         post_id: post_id
     }
-    fetch('http://localhost:3000/dislike', {
+    fetch(baseUrl + 'dislike', {
         method: 'POST',
         headers: {
+            'Authorization': token,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(newDislike),
@@ -402,7 +417,7 @@ export const dislikePost = (user_id, post_id, user, categories = null, profile_i
         if (Object.keys(response).length !== 0) {
             user.disliked.push(response);
             user.liked = user.liked.filter(post => post.id !== post_id);
-            dispatch(addUser(user));
+            dispatch(addUser({user: user}));
         }
         // console.log(response);
     })
@@ -414,13 +429,15 @@ export const dislikePost = (user_id, post_id, user, categories = null, profile_i
 
 // sends attempt to unlike a post
 export const undislikePost = (user_id, post_id, user, categories = null, profile_id = null) => (dispatch) => {
+    const token = 'Bearer ' + localStorage.getItem('token');
     const dislike = {
         user_id: user_id,
         post_id: post_id
     }
-    fetch('http://localhost:3000/dislike', {
+    fetch(baseUrl + 'dislike', {
         method: 'DELETE',
         headers: {
+            'Authorization': token,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(dislike),
@@ -437,7 +454,7 @@ export const undislikePost = (user_id, post_id, user, categories = null, profile
             }
             user = JSON.parse(JSON.stringify(user))
             user.disliked = user.liked.filter(post => post.id !== post_id);
-            dispatch(addUser(user));
+            dispatch(addUser({user: user}));
             return response
         } else {
             var err = new Error('Error' + response.status + ": " + response.statusText);
@@ -453,13 +470,15 @@ export const undislikePost = (user_id, post_id, user, categories = null, profile
 
 // sends attempt to save a post
 export const savePost = (user_id, post_id, user, categories = null, profile_id = null) => (dispatch) => {
+    const token = 'Bearer ' + localStorage.getItem('token');
     const newSave = {
         user_id: user_id,
         post_id: post_id
     }
-    fetch('http://localhost:3000/save', {
+    fetch(baseUrl + 'save', {
         method: 'POST',
         headers: {
+            'Authorization': token,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(newSave),
@@ -487,7 +506,7 @@ export const savePost = (user_id, post_id, user, categories = null, profile_id =
         user = JSON.parse(JSON.stringify(user))
         if (Object.keys(response).length !== 0) {
             user.saved.push(response);
-            dispatch(addUser(user));
+            dispatch(addUser({user: user}));
         }
         // console.log(response);
     })
@@ -499,13 +518,15 @@ export const savePost = (user_id, post_id, user, categories = null, profile_id =
 
 // sends attempt to unlike a post
 export const unsavePost = (user_id, post_id, user, categories = null, profile_id = null) => (dispatch) => {
+    const token = 'Bearer ' + localStorage.getItem('token');
     const save = {
         user_id: user_id,
         post_id: post_id
     }
-    fetch('http://localhost:3000/save', {
+    fetch(baseUrl + 'save', {
         method: 'DELETE',
         headers: {
+            'Authorization': token,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(save),
@@ -522,7 +543,7 @@ export const unsavePost = (user_id, post_id, user, categories = null, profile_id
             }
             user = JSON.parse(JSON.stringify(user))
             user.saved = user.saved.filter(post => post.id !== post_id);
-            dispatch(addUser(user));
+            dispatch(addUser({user: user}));
             return response
         } else {
             var err = new Error('Error' + response.status + ": " + response.statusText);
@@ -541,14 +562,16 @@ export const unsavePost = (user_id, post_id, user, categories = null, profile_id
 
 // sends attempt to create new reply to the backend
 export const postNewReply = (body, user_id, post_id) => (dispatch) => {
+    const token = 'Bearer ' + localStorage.getItem('token');
     const newReply = {
         body: body,
         user_id: user_id,
         post_id: post_id
     }
-    fetch('http://localhost:3000/replies', {
+    fetch(baseUrl + 'replies', {
         method: 'POST',
         headers: {
+            'Authorization': token,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(newReply),
@@ -578,8 +601,12 @@ export const postNewReply = (body, user_id, post_id) => (dispatch) => {
 
 // sends attempt to delete a reply to the backend
 export const deleteReply = (reply_id) => (dispatch) => {
-    fetch('http://localhost:3000/replies/' + reply_id.toString(), {
-        method: 'DELETE'
+    const token = 'Bearer ' + localStorage.getItem('token');
+    fetch(baseUrl + 'replies/' + reply_id.toString(), {
+        method: 'DELETE',
+        headers: {
+            'Authorization': token
+        }
     })
     .then(response => {
         // console.log(response);

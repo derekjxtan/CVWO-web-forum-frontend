@@ -85,12 +85,12 @@ export const Profile = () => {
                         <Replies replies={profile.replies} />
                     : view === 2
                     ?
-                        <Posts posts={userStatus.user.liked} />
+                        <Posts posts={profile.liked} />
                     : view === 3
                     ?
-                        <Posts posts={userStatus.user.disliked} />
+                        <Posts posts={profile.disliked} />
                     :
-                        <Posts posts={userStatus.user.saved} />
+                        <Posts posts={profile.saved} />
                 }
             </div>
         )

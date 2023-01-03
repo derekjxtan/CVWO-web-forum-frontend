@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
 import Card  from "react-bootstrap/Card";
@@ -15,9 +15,17 @@ const SinglePost = (props) => {
     const post = props.post;
     const userStatus = useSelector(state => state.user);
 
-    const [like, setLike] = useState(userStatus.user.liked.find(item => item.id === post.id) === undefined);
-    const [dislike, setDislike] = useState(userStatus.user.disliked.find(item => item.id === post.id) === undefined);
-    const [save, setSave] = useState(userStatus.user.saved.find(item => item.id === post.id) === undefined);
+    const [like, setLike] = useState(false);
+    const [dislike, setDislike] = useState(false);
+    const [save, setSave] = useState(false);
+
+    useEffect(() => {
+        if (userStatus.isAuthenticated) {
+            setLike(userStatus.user.liked.find(item => item.id === post.id) === undefined);
+            setDislike(userStatus.user.disliked.find(item => item.id === post.id) === undefined);
+            setSave(userStatus.user.saved.find(item => item.id === post.id) === undefined);
+        }
+    }, [userStatus])
 
     const handleLike = () => {
         props.handleLike(props.post.id, like);

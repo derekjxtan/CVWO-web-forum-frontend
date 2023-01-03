@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { baseUrl } from "./baseUrl";
 
 
 const initialState = {
@@ -13,13 +14,14 @@ const userSlice = createSlice({
     initialState,
     reducers: {
         addUser(state, action) {
-            localStorage.setItem('user', JSON.stringify(action.payload));
-            return {...state, isAuthenticated: true, user: action.payload}
+            localStorage.setItem('isAuthenticated', true);
+            localStorage.setItem('user', JSON.stringify(action.payload.user));
+            return {...state, isAuthenticated: true, user: action.payload.user}
         },
         removeUser(state) {
             localStorage.setItem('isAuthenticated', false);
             localStorage.setItem('user', null);
-            return {...state, isAuthenticated: false, user: null}
+            return {...state, isAuthenticated: false, token: null,user: null}
         }
     }
 })
@@ -34,7 +36,9 @@ export const checkLogin = () => (dispatch) => {
     const loginStatus = localStorage.getItem('isAuthenticated');
     if (loginStatus === "true") {
         // console.log("already logged in");
-        dispatch(addUser(JSON.parse(localStorage.getItem('user'))));
+        dispatch(addUser({
+            user: JSON.parse(localStorage.getItem('user'))
+        }));
     }
     console.log("checkLogin Called");
 }
@@ -46,7 +50,7 @@ export const login = (username, password) => (dispatch) => {
         username: username,
         password: password
     };
-    fetch('http://localhost:3000/login', {
+    fetch(baseUrl + 'login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -58,30 +62,27 @@ export const login = (username, password) => (dispatch) => {
         if (resp.ok) {
             return resp;
         } else {
-            var err = new Error('Error ' + resp.status + ': ' + resp.statusText);
-            err.response = resp;
+            if (resp.status === 401) {
+                alert("username or password is wrong. Please try again");
+            }
+            var err = new Error(resp.statusText);
             throw err;
         }
     })
     .then((response) => response.json())
     .then((response) => {
-        // console.log(response);
-        if (response === null) {
-            alert("Login failed. Username or password is wrong.")
-        } else {
-            localStorage.setItem('isAuthenticated', true);
-            dispatch(addUser(response));
-        }
+        localStorage.setItem('token', response.token);
+        dispatch(addUser(response));
     })
     .catch((error) => {
         console.log(error);
-        alert('Login could not be posted\nError: ' + error.message);
     })
 }
 
 // logs user out from account
 // overrides data in the store and local storage
 export const logout = () => (dispatch) => {
+    localStorage.setItem('token', null);
     dispatch(removeUser())
 }
 
@@ -91,7 +92,7 @@ export const register = (username, password) => (dispatch) => {
         username: username,
         password: password
     };
-    fetch('http://localhost:3000/users', {
+    fetch(baseUrl + 'users', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
