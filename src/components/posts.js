@@ -11,6 +11,10 @@ import { Link } from "react-router-dom";
 
 import { likePost, unlikePost, dislikePost, undislikePost, savePost, unsavePost, deletePost } from "../reducers/postsSlice";
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+import { solid, regular } from "@fortawesome/fontawesome-svg-core/import.macro";
+
 const SinglePost = (props) => {
     const post = props.post;
     const userStatus = useSelector(state => state.user);
@@ -19,28 +23,45 @@ const SinglePost = (props) => {
     const [dislike, setDislike] = useState(false);
     const [save, setSave] = useState(false);
 
+    const [likes, setLikes] = useState(post.likes);
+    const [dislikes, setDislikes] = useState(post.dislikes);
+
     useEffect(() => {
         if (userStatus.isAuthenticated) {
             setLike(userStatus.user.liked.find(item => item.id === post.id) === undefined);
             setDislike(userStatus.user.disliked.find(item => item.id === post.id) === undefined);
             setSave(userStatus.user.saved.find(item => item.id === post.id) === undefined);
         }
-    }, [userStatus])
+    }, [userStatus, post.id])
 
     const handleLike = () => {
         props.handleLike(props.post.id, like);
         if (like && !dislike) {
+            setDislikes(dislikes - 1);
             setDislike(true);
         }
-        setLike(!like);
+        if (like) {
+            setLikes(likes + 1);
+            setLike(false);
+        } else {
+            setLikes(likes - 1);
+            setLike(true);
+        }
     }
 
     const handleDislike = () => {
         props.handleDislike(props.post.id, dislike);
         if (dislike & !like) {
+            setLikes(likes - 1)
             setLike(true);
+        } 
+        if (dislike) {
+            setDislikes(dislikes + 1);
+            setDislike(false);
+        } else {
+            setDislikes(dislikes - 1);
+            setDislike(true);
         }
-        setDislike(!dislike);
     }
 
     const handleSave = () => {
@@ -52,54 +73,90 @@ const SinglePost = (props) => {
         props.handleDelete(props.post.id);
     }
 
+    const date = new Date(post.created_at);
+
     return (
         <Card className="mt-3">
             <Card.Header>
-                <Card.Title className="d-flex justify-content-start">{post.title}</Card.Title>
                 <Row>
                     <Col className="d-flex justify-content-start">
-                        <Card.Subtitle>
-                            @<Link to={`/users/${post.user.id}`}>{post.user.username}</Link>, {post.created_at}
-                        </Card.Subtitle>
+                        <Card.Title>{post.title}</Card.Title>
                     </Col>
                     <Col className="d-flex justify-content-end">
-                        <Card.Subtitle>Likes: {post.likes}, Dislikes: {post.dislikes}</Card.Subtitle>
+                        {
+                            userStatus.isAuthenticated && userStatus.user.id === post.user.id
+                            ?
+                                <div>
+                                    <Link to={`/posts/${post.id}/edit`} className='btn btn-outline-dark button-plain'>
+                                        <FontAwesomeIcon icon={solid('pen')} />
+                                    </Link>
+                                    <Button variant='outline-dark' className="button-plain" onClick={handleDelete}>
+                                        <FontAwesomeIcon icon={solid('trash')}/>
+                                    </Button>
+                                    <Link to={`/posts/${post.id}`} className='btn btn-outline-dark button-plain'>
+                                        <FontAwesomeIcon icon={solid('up-right-and-down-left-from-center')}/>
+                                    </Link>
+                                </div>
+                            : 
+                                <Link to={`/posts/${post.id}`} className='btn btn-outline-dark button-plain'>
+                                    <FontAwesomeIcon icon={solid('up-right-and-down-left-from-center')}/>
+                                </Link>
+                        }
                     </Col>
                 </Row>
+                    <Card.Subtitle className="d-flex justify-content-start">
+                        @<Link to={`/users/${post.user.id}`}>{post.user.username}</Link>, {date.toLocaleTimeString() + ", " + date.toLocaleDateString()}
+                    </Card.Subtitle>
                 <Card.Subtitle className="d-flex justify-content-start mt-1">Categories: {post.categories.reduce((x, y) => x + y + ", ", "").slice(0,-2)}</Card.Subtitle>
             </Card.Header>
             <Card.Body>
                 <Card.Text>{post.body.substring(0, 100)}</Card.Text>
-                    {
-                        userStatus.isAuthenticated
-                        ? userStatus.user.id === post.user.id
-                            ?
-                                <div className="d-flex justify-content-end">
-                                    <Link to={`/posts/${post.id}/edit`} className='btn btn-success me-2'>Edit</Link>
-                                    <Button variant='danger' className="me-2" onClick={handleDelete}>Delete</Button>
-                                    <Link to={`/posts/${post.id}`} className='btn btn-primary me-2'>See full</Link>
-                                    <Button variant='outline-secondary' onClick={handleSave} active={save}>Save</Button>
-                                </div>
-                            :
-                                <div className="d-flex justify-content-end">
-                                    <Button variant='outline-success' className="me-2" onClick={handleLike} active={like}>
-                                        Like
-                                    </Button>
-                                    <Button variant='outline-danger' className="me-2" onClick={handleDislike} active={dislike}>
-                                        Dislike
-                                    </Button>
-                                    <Link to={`/posts/${post.id}`} className='btn btn-primary me-2'>See full</Link>
-                                    <Button variant='outline-secondary' onClick={handleSave} active={save}>Save</Button>
-                                </div>
-                        :
-                            <div className="d-flex justify-content-end">
-                                <Button variant='success' className="me-2">Like</Button>
-                                <Button variant='danger' className="me-2">Dislike</Button>
-                                <Link to={`/posts/${post.id}`} className='btn btn-primary me-2'>See full</Link>
-                                <Button variant='outline-secondary' onClick={() => handleSave(post.id)}>Save</Button>
-                            </div>
-                    }
             </Card.Body>
+            <Card.Footer>
+            {
+                userStatus.isAuthenticated
+                ?
+                    <div className="d-flex justify-content-end">
+                        <Button variant='outline-success' className="button-plain" onClick={handleLike}>
+                            {
+                                like
+                                ? <FontAwesomeIcon icon={regular('thumbs-up')} size='lg'/>
+                                : <FontAwesomeIcon icon={solid('thumbs-up')} size='lg'/>
+                            }
+                            &nbsp;{likes}
+                        </Button>
+                        <Button variant='outline-danger' className="button-plain" onClick={handleDislike}>
+                            {
+                                dislike
+                                ? <FontAwesomeIcon icon={regular('thumbs-down')} size='lg'/>
+                                : <FontAwesomeIcon icon={solid('thumbs-down')} size='lg'/>
+                            }
+                            &nbsp; {dislikes}
+                        </Button>
+                        <Button variant='outline-secondary' className="button-plain" onClick={handleSave}>
+                            {
+                                save
+                                ? <FontAwesomeIcon icon={regular('bookmark')} size='lg'/>
+                                : <FontAwesomeIcon icon={solid('bookmark')} size='lg'/>
+                            }
+                        </Button>
+                    </div>
+                :
+                    <div className="d-flex justify-content-end">
+                        <Button variant='outline-success' className="button-plain">
+                            <FontAwesomeIcon icon={regular('thumbs-up')} size='lg'/>
+                            &nbsp;{post.likes}
+                        </Button>
+                        <Button variant='outline-danger' className=" button-plain">
+                            <FontAwesomeIcon icon={regular('thumbs-down')} size='lg'/>
+                            &nbsp;{post.dislikes}
+                        </Button>
+                        <Button variant='outline-secondary' className="button-plain" >
+                            <FontAwesomeIcon icon={regular('bookmark')} size='lg'/>
+                        </Button>
+                    </div>
+            }
+            </Card.Footer>
         </Card>
     )
 }
@@ -147,27 +204,27 @@ export const Posts = (props) => {
     // checks whether post has already been liked by user. If so call likePost, otherwise call unlikePost
     const handleLike = (post_id, like) => {
         if (like) {
-            dispatch(likePost(userStatus.user.id, post_id, userStatus.user, props.categories, props.profile_id));
+            dispatch(likePost(userStatus.user.id, post_id, userStatus.user));
         } else {
-            dispatch(unlikePost(userStatus.user.id, post_id, userStatus.user, props.categories, props.profile_id));
+            dispatch(unlikePost(userStatus.user.id, post_id, userStatus.user));
         }
     }
 
     // checks whether post has already been disliked by user. If so call dislikePost, otherwise call undislikePost
     const handleDislike = (post_id, dislike) => {
         if (dislike) {
-            dispatch(dislikePost(userStatus.user.id, post_id, userStatus.user, props.categories, props.profile_id));
+            dispatch(dislikePost(userStatus.user.id, post_id, userStatus.user));
         } else {
-            dispatch(undislikePost(userStatus.user.id, post_id, userStatus.user, props.categories, props.profile_id));
+            dispatch(undislikePost(userStatus.user.id, post_id, userStatus.user));
         }
     }
 
     // checks whether post has already been saved by user. If so call savePost, otherwise call unsavePost
     const handleSave = (post_id, save) => {
         if (save) {
-            dispatch(savePost(userStatus.user.id, post_id, userStatus.user, props.categories, props.profile_id));
+            dispatch(savePost(userStatus.user.id, post_id, userStatus.user));
         } else {
-            dispatch(unsavePost(userStatus.user.id, post_id, userStatus.user, props.categories, props.profile_id));
+            dispatch(unsavePost(userStatus.user.id, post_id, userStatus.user));
         }
     }
 

@@ -5,7 +5,6 @@ import { useSelector, useDispatch } from "react-redux";
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
-import NavDropdown from 'react-bootstrap/NavDropdown';
 import Button from 'react-bootstrap/Button';
 import Modal  from "react-bootstrap/Modal";
 import Form from 'react-bootstrap/Form';
@@ -13,6 +12,10 @@ import Form from 'react-bootstrap/Form';
 import { login, logout, register } from "../reducers/userSlice";
 
 import { Link, useNavigate } from "react-router-dom";
+
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+import { solid } from "@fortawesome/fontawesome-svg-core/import.macro";
 
 
 
@@ -33,6 +36,7 @@ export const Header = () => {
     const loginUser = (e) => {
         e.preventDefault();
         dispatch(login(e.target[1].value, e.target[2].value));
+        navigate();
     }
 
     // called when user attempts to register a new account
@@ -41,6 +45,7 @@ export const Header = () => {
         e.preventDefault();
         // console.log(e.target[1].value, e.target[2].value);
         dispatch(register(e.target[1].value, e.target[2].value));
+        navigate();
     }
 
     // called when user attempts to log out
@@ -48,6 +53,7 @@ export const Header = () => {
     const logoutUser = (e) => {
         e.preventDefault();
         dispatch(logout());
+        navigate();
     }
 
     // format url and navigate to categories
@@ -69,30 +75,22 @@ export const Header = () => {
     }
 
     return (
-        <Navbar bg='light' expand='lg'>
+        <Navbar expand='lg'>
             <Container>
                 <Navbar.Brand href='/'>Gossip</Navbar.Brand>
                 <Navbar.Toggle aria-controls='basic-navbar'/>
                 <Navbar.Collapse id='basic-navbar'>
                     <Nav className="me-auto">
-                        <Nav.Link href='/'>Home</Nav.Link>
-                        <NavDropdown title="Categories" id="basic-nav-dropdown">
-                            <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
-                            <NavDropdown.Item href="#action/3.2">
-                                Another action
-                            </NavDropdown.Item>
-                            <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
-                            <NavDropdown.Divider />
-                            <NavDropdown.Item href="#action/3.4">
-                                Separated link
-                            </NavDropdown.Item>
-                        </NavDropdown>
+                        <Nav.Link href='/'>
+                            <FontAwesomeIcon icon={solid('house')}/> Home
+                        </Nav.Link>
                         {
                             userStatus.isAuthenticated
                             ?
                             <Nav>
-                                <Link to={`/new`} className='btn'>New Post</Link>
-                                <Nav.Link href='/saved'>Saved</Nav.Link>
+                                <Link to={`/new`} className='btn'>
+                                    <FontAwesomeIcon icon={solid('plus')}/> New Post
+                                </Link>
                             </Nav>
                             :
                                 <div />
@@ -105,20 +103,28 @@ export const Header = () => {
                             <Nav className="ms-auto">
                                 <Form className="d-flex me-3" onSubmit={searchCategories}>
                                     <Form.Control type='search' placeholder="Search Categories" className="me-2" />
-                                    <Button variant="outline-success" type="submit">Search</Button>
+                                    <Button variant="outline-dark" type="submit"><FontAwesomeIcon icon={solid('magnifying-glass')} size='lg'/></Button>
                                 </Form>
-                                <Nav.Link href={`/users/${userStatus.user.id}`} className='btn me-2'>{userStatus.user.username}</Nav.Link>
-                                <Button variant="primary" className="" onClick={logoutUser}>Log out</Button>
+                                <Nav.Link href={`/users/${userStatus.user.id}`} className='btn me-2'>
+                                    <FontAwesomeIcon icon={solid('user')}/> {userStatus.user.username}
+                                </Nav.Link>
+                                <Button variant="primary" className="" onClick={logoutUser}>
+                                    <FontAwesomeIcon icon={solid('right-from-bracket')}/> Log out
+                                </Button>
                             </Nav>
                         :
                             <div>
                                 <Nav>
                                     <Form className="d-flex me-3" onSubmit={searchCategories}>
                                         <Form.Control type='search' placeholder="Search Categories" className="me-2" />
-                                        <Button variant="outline-success" type="submit">Search</Button>
+                                        <Button variant="outline-dark" type="submit"><FontAwesomeIcon icon={solid('magnifying-glass')}/></Button>
                                     </Form>
-                                    <Button variant="primary" onClick={toggleLogin}>Log in</Button>
-                                    <Button variant="primary" className="ms-1" onClick={toggleRegister}>Register</Button>
+                                    <Button variant="primary" onClick={toggleLogin}>
+                                        <FontAwesomeIcon icon={solid('right-to-bracket')}/> Log in
+                                    </Button>
+                                    <Button variant="primary" className="ms-1" onClick={toggleRegister}>
+                                        <FontAwesomeIcon icon={solid('user-plus')}/> Register
+                                    </Button>
                                 </Nav>
 
                                 <Modal show={showLogin} onHide={toggleLogin}>
@@ -138,10 +144,10 @@ export const Header = () => {
                                         </Modal.Body>
                                         <Modal.Footer>
                                             <Button variant="secondary" onClick={toggleLogin}>
-                                                Cancel
+                                                <FontAwesomeIcon icon={solid('ban')}/> Cancel
                                             </Button>
                                             <Button variant="primary" type="submit">
-                                                Login
+                                                <FontAwesomeIcon icon={solid('right-to-bracket')}/> Log in
                                             </Button>                                
                                         </Modal.Footer>
                                     </Form>
@@ -168,10 +174,10 @@ export const Header = () => {
                                         </Modal.Body>
                                         <Modal.Footer>
                                             <Button variant="secondary" onClick={toggleRegister}>
-                                                Cancel
+                                                <FontAwesomeIcon icon={solid('ban')}/> Cancel
                                             </Button>
                                             <Button variant="primary" type="submit">
-                                                Register
+                                                <FontAwesomeIcon icon={solid('user-plus')}/> Register
                                             </Button>                                
                                         </Modal.Footer>
                                     </Form>

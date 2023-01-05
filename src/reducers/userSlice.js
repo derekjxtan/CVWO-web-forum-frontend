@@ -3,6 +3,8 @@ import { baseUrl } from "./baseUrl";
 
 
 const initialState = {
+    isLoading: false,
+    err: null,
     isAuthenticated: false,
     user: null
     // user_id: null,
@@ -13,10 +15,16 @@ const userSlice = createSlice({
     name: 'user',
     initialState,
     reducers: {
-        addUser(state, action) {
+        userSuccess(state, action) {
             localStorage.setItem('isAuthenticated', true);
             localStorage.setItem('user', JSON.stringify(action.payload.user));
-            return {...state, isAuthenticated: true, user: action.payload.user}
+            return {...state, isLoading: false, err: null, isAuthenticated: true, user: action.payload.user}
+        },
+        userLoading(state, action) {
+            return {...state, isLoading: true, err: null, isAuthenticated: false, user: null}
+        },
+        userFailed(state, action) {
+            return {...state, isLoading: false, err: action.payload, isAuthenticated: false, user: null}
         },
         removeUser(state) {
             localStorage.setItem('isAuthenticated', false);
@@ -26,7 +34,7 @@ const userSlice = createSlice({
     }
 })
 
-export const { addUser, removeUser, addLike, removeLike } = userSlice.actions
+export const { userSuccess, userLoading, userFailed, removeUser } = userSlice.actions
 
 export default userSlice.reducer
 
@@ -36,7 +44,7 @@ export const checkLogin = () => (dispatch) => {
     const loginStatus = localStorage.getItem('isAuthenticated');
     if (loginStatus === "true") {
         // console.log("already logged in");
-        dispatch(addUser({
+        dispatch(userSuccess({
             user: JSON.parse(localStorage.getItem('user'))
         }));
     }
@@ -72,7 +80,7 @@ export const login = (username, password) => (dispatch) => {
     .then((response) => response.json())
     .then((response) => {
         localStorage.setItem('token', response.token);
-        dispatch(addUser(response));
+        dispatch(userSuccess(response));
     })
     .catch((error) => {
         console.log(error);
@@ -109,7 +117,7 @@ export const register = (username, password) => (dispatch) => {
             throw err;
         } else {
             alert("Register Sucessfully. Log in to continue.");
-            // dispatch(addUser(response));
+            // dispatch(userSuccess(response));
         }
     })
     .catch((error) => {

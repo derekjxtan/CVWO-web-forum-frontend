@@ -2,9 +2,7 @@ import React, { useEffect } from "react";
 
 import { useDispatch, useSelector } from "react-redux";
 
-import { useParams } from "react-router-dom";
-
-import { Link } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { editPost, fetchPost } from "../reducers/postsSlice";
 
@@ -12,48 +10,73 @@ import Container from "react-bootstrap/Container";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+import { solid } from "@fortawesome/fontawesome-svg-core/import.macro";
+import { LoadingSpinner } from "./loading";
+import { Error } from "./error";
+
 
 export const EditPostForm = () => {
-    const dispatch = useDispatch()
+    const dispatch = useDispatch();
     const params = useParams();
+    const navigate = useNavigate();
 
     const postId =  parseInt(params.postId);
 
     useEffect(() => {
         dispatch(fetchPost(postId));
-    }, [])
+    }, [dispatch, postId])
 
-    const post = useSelector(state => state.posts.posts.find(post => post.id === postId))
-    const userStatus = useSelector(state => state.user)
+    const postsStatus = useSelector(state => state.posts);
+    const post = postsStatus.posts.find(post => post.id === postId);
+
+    const userStatus = useSelector(state => state.user);
 
     // called when attempting to edit a post
     const handleEdit = (e) => {
         // console.log(e.target[0].value, e.target[1].value);
-        dispatch(editPost(postId, e.target[0].value, e.target[1].value, e.target[2].value));
         e.preventDefault();
+        dispatch(editPost(postId, e.target[0].value, e.target[1].value, e.target[2].value));
+        navigate(`/posts/${postId}`);
     }
 
-    if (userStatus.isAuthenticated && post && userStatus.user.id === post.user_id) {
+    // callled when cancel is clicked, navigates to previous page
+    const handleCancel = () => {
+        navigate(-1);
+    }
+
+    if (postsStatus.isLoading) {
+        return (
+            <LoadingSpinner />
+        );
+    } else if (postsStatus.err) {
+        return (
+            <Error error={postsStatus.err} />
+        );
+    } else if (userStatus.isAuthenticated && post && userStatus.user.id === post.user_id) {
         return (
             <Container className="col-8">
-                <h1>Edit Thread</h1>
+                <h1 className="white-text">Edit Thread</h1>
                 <Form onSubmit={handleEdit}>
                     <Form.Group className="mb-3" controlId="title">
-                        <Form.Label className="ms-auto">Title</Form.Label>
+                        <Form.Label className="float-start white-text">Title</Form.Label>
                         <Form.Control type="text" placeholder="Title" defaultValue={post.title} required/>
                     </Form.Group>
                     <Form.Group className="mb-3" controlId="body">
-                        <Form.Label>Body Text</Form.Label>
+                        <Form.Label className="float-start white-text">Body Text</Form.Label>
                         <Form.Control as="textarea" rows={10} placeholder="Text" defaultValue={post.body}/>
                     </Form.Group>
                     <Form.Group className="mb-3" controlId="categories">
-                        <Form.Label>Categories</Form.Label>
+                        <Form.Label className="float-start white-text">Categories</Form.Label>
                         <Form.Control type="text" placeholder="categories" defaultValue={post.categories.reduce((x, y) => x + y + " ", "")}/>
-                        <Form.Text className="float-start" muted>Enter categories separated with a space</Form.Text>
+                        <Form.Text className="float-start white-text">Enter categories separated with a space</Form.Text>
                     </Form.Group>
-                    <Link to={`/posts/${postId}`} className='btn btn-secondary float-end'>Cancel</Link>
+                    <Button variant="secondary" className="float-end" onClick={handleCancel}>
+                        <FontAwesomeIcon icon={solid('ban')}/> Cancel
+                    </Button>
                     <Button variant="primary" className="float-end me-2" type="submit">
-                        Edit
+                        <FontAwesomeIcon icon={solid('pen')}/> Edit
                     </Button> 
                 </Form>
             </Container>

@@ -1,5 +1,7 @@
 .App {
   text-align: center;
+  background-color: #524632 !important;
+  min-height: 100vh !important;
 }
 
 .App-logo {
@@ -42,4 +44,58 @@
   border-top: 1px ridge rgb(0, 0, 0);
   /* border-bottom: 1px ridge rgb(0, 0, 0); */
   padding-top: 5px;
+}
+
+.button-plain {
+  border: none !important;
+}
+
+.button-plain:focus {
+  border: none !important;
+}
+
+.card {
+  border: 15px !important;
+  border-color: black !important;
+}
+
+.card-footer {
+  background-color: #DAE3E7 !important;
+}
+
+.card-header {
+  background-color: #DBC6A9 !important;
+}
+
+@keyframes spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-spinner {
+  width: 100px;
+  height: 100px;
+  border: 10px solid #f3f3f3;
+  border-top: 10px solid #383636;
+  border-radius: 50%;
+  animation: spinner 1.5s linear infinite;
+}
+
+.spinner-container {
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  height: 350px;
+}
+
+.navbar {
+  background-color: #AAB592 !important;
+}
+
+.white-text {
+  color: white !important;
 }

@@ -11,19 +11,26 @@ import { fetchProfile } from "../reducers/profileSlice";
 import { Posts } from "./posts";
 import { Replies } from "./replies";
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+import { solid } from "@fortawesome/fontawesome-svg-core/import.macro";
+import { LoadingSpinner } from "./loading";
+import { Error } from "./error";
+
 
 export const Profile = () => {
     const params = useParams();
     const dispatch = useDispatch();
 
     const userStatus = useSelector(state => state.user)
-    const profile = useSelector(state => state.profile).profile
+    const profileStatus = useSelector(state => state.profile)
+    const profile = profileStatus.profile
 
     const [view, setView] = useState(0);
 
     useEffect(() => {
         dispatch(fetchProfile(parseInt(params.userId)));
-    }, [])
+    }, [dispatch, params])
 
     const displayPosts = () => {
         if (view !== 0) {
@@ -55,20 +62,30 @@ export const Profile = () => {
         }
     }
 
-    if (userStatus.isAuthenticated && profile) {
+    if (profile) {
         return (
             <div>
-                <h1>Profile</h1>
-                <h3>{profile.username}</h3>
+                <h1 className="white-text">Profile</h1>
+                <h3 className="white-text">{profile.username}</h3>
                 {
-                    profile.id === userStatus.user.id
+                    userStatus.isAuthenticated && profile.id === userStatus.user.id
                     ?
                         <div>
-                            <Button variant="primary" active={view===0} onClick={displayPosts}>Posts</Button>
-                            <Button variant="primary" active={view===1} className="ms-2" onClick={displayReplies}>Replies</Button>
-                            <Button variant="primary" active={view===2} className="ms-2" onClick={displayLikes}>Liked</Button>
-                            <Button variant="primary" active={view===3} className="ms-2" onClick={displayDislikes}>Disliked</Button>
-                            <Button variant="primary" active={view===4} className="ms-2" onClick={displaySaves}>Saved</Button>
+                            <Button variant="primary" active={view===0} onClick={displayPosts}>
+                                <FontAwesomeIcon icon={solid('rectangle-list')}/> Posts
+                            </Button>
+                            <Button variant="primary" active={view===1} className="ms-2" onClick={displayReplies}>
+                                <FontAwesomeIcon icon={solid('reply')}/> Replies
+                            </Button>
+                            <Button variant="primary" active={view===2} className="ms-2" onClick={displayLikes}>
+                                <FontAwesomeIcon icon={solid('thumbs-up')}/> Liked
+                            </Button>
+                            <Button variant="primary" active={view===3} className="ms-2" onClick={displayDislikes}>
+                                <FontAwesomeIcon icon={solid('thumbs-down')}/> Disliked
+                            </Button>
+                            <Button variant="primary" active={view===4} className="ms-2" onClick={displaySaves}>
+                                <FontAwesomeIcon icon={solid('bookmark')}/> Saved
+                            </Button>
                         </div>
                     :  
                         <div>
@@ -93,6 +110,14 @@ export const Profile = () => {
                         <Posts posts={profile.saved} />
                 }
             </div>
+        )
+    } else if (profileStatus.isLoading) {
+        return (
+            <LoadingSpinner />
+        )
+    } else if (profileStatus.err) {
+        return (
+            <Error error={profileStatus.err}  />
         )
     } else {
         return (

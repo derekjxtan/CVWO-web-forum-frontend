@@ -1,6 +1,8 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchPosts } from "../reducers/postsSlice";
+import { Error } from "./error";
+import { LoadingSpinner } from "./loading";
 import { Posts } from "./posts";
 
 export const HomePage = () => {
@@ -8,11 +10,19 @@ export const HomePage = () => {
 
     useEffect(() => {
         dispatch(fetchPosts());
-    }, [])
+    }, [dispatch])
 
-    const posts = useSelector(state => state.posts).posts
-
+    const postsStatus = useSelector(state => state.posts)
+    const posts = postsStatus.posts
+    
     return (
-        <Posts posts={posts} />
+        postsStatus.isLoading
+        ?
+            <LoadingSpinner />
+        : postsStatus.err
+        ?
+            <Error error={postsStatus.err} />
+        :
+            <Posts posts={posts} />
     )
 }
