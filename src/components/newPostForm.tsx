@@ -1,36 +1,39 @@
-import React from "react";
+import React, { SyntheticEvent } from "react";
+
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+
+import { useNavigate } from "react-router-dom";
 
 import Container from "react-bootstrap/Container";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 
-import { postNewPost } from "../reducers/postsSlice";
-
-import { useNavigate } from "react-router-dom";
-
-import { useDispatch, useSelector } from "react-redux";
-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
 import { solid } from "@fortawesome/fontawesome-svg-core/import.macro";
 
+import { postNewPost } from "../reducers/postsSlice";
+
+
 export const NewPostForm = () => {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
 
-    const userStatus = useSelector(state => state.user)
+    const userStatus = useAppSelector(state => state.user)
 
     // called when attempting to create a new post
-    const postForm = (e) => {
-        // console.log(e);
-        // console.log(e.target[0].value, e.target[1].value, userStatus.user.id);
+    const postForm = (e: SyntheticEvent) => {
         e.preventDefault();
+        const target = e.target as typeof e.target & {
+            title: {value: string};
+            body: {value: string};
+            categories: {value: string};
+        };
         if (userStatus.isAuthenticated) {
             dispatch(postNewPost(
-                e.target[0].value, 
-                e.target[1].value,
-                e.target[2].value, 
-                userStatus.user.id
+                target.title.value, 
+                target.body.value,
+                target.categories.value, 
+                userStatus.id!
             ));
             navigate(-1)
         } else {

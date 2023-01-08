@@ -1,35 +1,35 @@
 import React, { useEffect, useState } from "react";
 
-import Button from 'react-bootstrap/Button';
+import { useAppDispatch, useAppSelector } from "../app/hooks";
 
 import { useParams } from "react-router-dom";
 
-import { useDispatch, useSelector } from "react-redux";
+import Button from 'react-bootstrap/Button';
+
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { solid } from "@fortawesome/fontawesome-svg-core/import.macro";
 
 import { fetchProfile } from "../reducers/profileSlice";
 
 import { Posts } from "./posts";
 import { Replies } from "./replies";
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
-import { solid } from "@fortawesome/fontawesome-svg-core/import.macro";
 import { LoadingSpinner } from "./loading";
 import { Error } from "./error";
 
 
 export const Profile = () => {
     const params = useParams();
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
 
-    const userStatus = useSelector(state => state.user)
-    const profileStatus = useSelector(state => state.profile)
+    const userStatus = useAppSelector(state => state.user)
+    const profileStatus = useAppSelector(state => state.profile)
     const profile = profileStatus.profile
 
     const [view, setView] = useState(0);
 
     useEffect(() => {
-        dispatch(fetchProfile(parseInt(params.userId)));
+        dispatch(fetchProfile(parseInt(params.userId!)));
     }, [dispatch, params])
 
     const displayPosts = () => {
@@ -68,7 +68,7 @@ export const Profile = () => {
                 <h1 className="white-text">Profile</h1>
                 <h3 className="white-text">{profile.username}</h3>
                 {
-                    userStatus.isAuthenticated && profile.id === userStatus.user.id
+                    userStatus.isAuthenticated && profile.id === userStatus.id
                     ?
                         <div>
                             <Button variant="primary" active={view===0} onClick={displayPosts}>
@@ -89,25 +89,25 @@ export const Profile = () => {
                         </div>
                     :  
                         <div>
-                            <Button variant="primary" active={view} onClick={displayPosts}>Posts</Button>
-                            <Button variant="primary" active={!view} className="ms-2" onClick={displayReplies}>Replies</Button>
+                            <Button variant="primary" active={view===0} onClick={displayPosts}>Posts</Button>
+                            <Button variant="primary" active={view===1} className="ms-2" onClick={displayReplies}>Replies</Button>
                         </div>
                 }
                 {
                     view === 0
                     ?
-                        <Posts posts={profile.posts} profile_id={profile.id}/>
+                        <Posts posts={profile.posts!} />
                     : view === 1
                     ?
-                        <Replies replies={profile.replies} />
+                        <Replies replies={profile.replies!} />
                     : view === 2
                     ?
-                        <Posts posts={profile.liked} />
+                        <Posts posts={profile.liked!} />
                     : view === 3
                     ?
-                        <Posts posts={profile.disliked} />
+                        <Posts posts={profile.disliked!} />
                     :
-                        <Posts posts={profile.saved} />
+                        <Posts posts={profile.saved!} />
                 }
             </div>
         )

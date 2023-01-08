@@ -1,8 +1,16 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { UserInterface } from "../app/interfaces";
+import { AppDispatch } from "../app/store";
 import { baseUrl } from "./baseUrl";
 
 
-const initialState = {
+interface ProfileState {
+    isLoading: boolean;
+    err: string | null;
+    profile: UserInterface | null;
+}
+
+const initialState: ProfileState = {
     isLoading: false,
     err: null,
     profile: null
@@ -15,7 +23,7 @@ const profileSlice = createSlice({
         profileSuccess(state, action) {
             return {...state, isLoading: false, err: null, profile: action.payload}
         },
-        profileLoading(state, action) {
+        profileLoading(state) {
             return {...state, isLoading: true, err: null, profile: null}
         },
         profileFailed(state, action) {
@@ -29,10 +37,10 @@ export const { profileSuccess, profileLoading, profileFailed } = profileSlice.ac
 export default profileSlice.reducer
 
 // fetch single profile from backend
-export const fetchProfile = (user_id) => (dispatch) => {
+export const fetchProfile = (user_id: number) => (dispatch: AppDispatch) => {
     dispatch(profileLoading());
     const token = 'Bearer ' + localStorage.getItem('token');
-    if (localStorage.getItem('token') !== "null") {
+    if (localStorage.getItem('token') !== null && localStorage.getItem('token') !== "null") {
         fetch(baseUrl + 'users/' + user_id.toString(), {
             method: 'GET',
             headers: {
@@ -45,7 +53,7 @@ export const fetchProfile = (user_id) => (dispatch) => {
                 return response
             } else {
                 var err = new Error('Error' + response.status + ": " + response.statusText);
-                err.response = response;
+                err.message = response.statusText;
                 throw err;
             }
         })
@@ -69,7 +77,7 @@ export const fetchProfile = (user_id) => (dispatch) => {
                 return response
             } else {
                 var err = new Error('Error' + response.status + ": " + response.statusText);
-                err.response = response;
+                err.message = response.statusText;
                 throw err;
             }
         })

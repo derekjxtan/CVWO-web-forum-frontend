@@ -1,9 +1,19 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { AppDispatch } from "../app/store";
 import { baseUrl } from "./baseUrl";
 
-import { userSuccess } from "./userSlice";
+import { updateUserDisliked, updateUserLiked, updateUserSaved } from "./userSlice";
 
-const initialState = {
+import { PostInterface } from "../app/interfaces";
+
+
+interface PostsState {
+    isLoading: boolean;
+    err: string | null;
+    posts: Array<PostInterface>
+}
+
+const initialState: PostsState = {
     isLoading: false,
     err: null,
     posts: []
@@ -16,7 +26,7 @@ const postsSlice = createSlice({
         postsSuccess(state, action) {
             return {...state, isLoading: false, err: null, posts: action.payload}
         },
-        postsLoading(state, action) {
+        postsLoading(state) {
             return {...state, isLoading: true, err: null, posts: []}
         },
         postsFailed(state, action) {
@@ -33,7 +43,7 @@ export default postsSlice.reducer
 // Functions for posts
 
 // fetches all posts from backend and loads them into the store
-export const fetchPosts = () => (dispatch) => {
+export const fetchPosts = () => (dispatch: AppDispatch) => {
     dispatch(postsLoading());
     fetch(baseUrl + 'posts', {
         method: 'GET'
@@ -44,7 +54,7 @@ export const fetchPosts = () => (dispatch) => {
             return response
         } else {
             var err = new Error('Error' + response.status + ": " + response.statusText);
-            err.response = response;
+            err.message = response.statusText;
             throw err;
         }
     })
@@ -61,7 +71,7 @@ export const fetchPosts = () => (dispatch) => {
 }
 
 // fetch posts by category from backend
-export const fetchPostsByCategory = (categories) => (dispatch) => {
+export const fetchPostsByCategory = (categories: string) => (dispatch: AppDispatch) => {
     dispatch(postsLoading());
     fetch(baseUrl + 'categories/' + categories, {
         method: 'GET'
@@ -72,7 +82,7 @@ export const fetchPostsByCategory = (categories) => (dispatch) => {
             return response
         } else {
             var err = new Error('Error' + response.status + ": " + response.statusText);
-            err.response = response;
+            err.message = response.statusText;
             throw err;
         }
     })
@@ -90,7 +100,7 @@ export const fetchPostsByCategory = (categories) => (dispatch) => {
 }
 
 // fetch single post from backend
-export const fetchPost = (post_id) => (dispatch) => {
+export const fetchPost = (post_id: number) => (dispatch: AppDispatch) => {
     dispatch(postsLoading());
     fetch(baseUrl + 'posts/' + post_id.toString(), {
         method: 'GET'
@@ -101,7 +111,7 @@ export const fetchPost = (post_id) => (dispatch) => {
             return response
         } else {
             var err = new Error('Error' + response.status + ": " + response.statusText);
-            err.response = response;
+            err.message = response.statusText;
             throw err;
         }
     })
@@ -118,21 +128,21 @@ export const fetchPost = (post_id) => (dispatch) => {
 }
 
 // sends attempt to create new post to the backend
-export const postNewPost = (title, body, categories, user_id) => (dispatch) => {
+export const postNewPost = (title: string, body:string, categories: string, user_id: number) => (dispatch: AppDispatch) => {
     // format categories, split string into array, remove blanks then remove whitespaces for individual entries
     categories = categories.trim();
     if (categories[categories.length - 1] === ',') {
         categories = categories.slice(0, -1);
     }
-    categories = categories.split(" ");
-    categories = categories.map(x => x.trim());
-    categories = categories.filter(x => x !== '');
+    var categoriesList = categories.split(" ");
+    categoriesList = categoriesList.map(x => x.trim());
+    categoriesList = categoriesList.filter(x => x !== '');
     // console.log(categories);
     const token = 'Bearer ' + localStorage.getItem('token');
     const newPost = {
         title: title,
         body: body,
-        categories: categories,
+        categories: categoriesList,
         user_id: user_id
     }
     fetch(baseUrl + 'posts', {
@@ -150,14 +160,13 @@ export const postNewPost = (title, body, categories, user_id) => (dispatch) => {
             return response
         } else {
             var err = new Error('Error' + response.status + ": " + response.statusText);
-            err.response = response;
+            err.message = response.statusText;
             throw err;
         }
     })
     .then(response => response.json())
     .then(response => {
         // console.log(response);
-        // dispatch(fetchPosts());
         return response;
     })
     .catch((err) => {
@@ -167,21 +176,21 @@ export const postNewPost = (title, body, categories, user_id) => (dispatch) => {
 }
 
 // send attempt to edit post to the backend
-export const editPost = (post_id, title, body, categories) => (dispatch) => {
+export const editPost = (post_id: number, title: string, body: string, categories: string) => (dispatch: AppDispatch) => {
     // format categories, split string into array, remove blanks then remove whitespaces for individual entries
     categories = categories.trim();
     if (categories[categories.length - 1] === ',') {
         categories = categories.slice(0, -1);
     }
-    categories = categories.split(" ");
-    categories = categories.map(x => x.trim());
-    categories = categories.filter(x => x !== '');
+    var categoriesList = categories.split(" ");
+    categoriesList = categoriesList.map(x => x.trim());
+    categoriesList = categoriesList.filter(x => x !== '');
     // console.log(categories);
     const token = 'Bearer ' + localStorage.getItem('token');
     const edits = {
         title: title,
         body: body,
-        categories: categories
+        categories: categoriesList
     }
     fetch(baseUrl + 'posts/' + post_id.toString(), {
         method: 'PUT',
@@ -198,14 +207,13 @@ export const editPost = (post_id, title, body, categories) => (dispatch) => {
             return response
         } else {
             var err = new Error('Error' + response.status + ": " + response.statusText);
-            err.response = response;
+            err.message = response.statusText;
             throw err;
         }
     })
     .then(response => response.json())
     .then(response => {
         // console.log(response);
-        // dispatch(fetchPosts());
         alert("Post edited");
         console.log(response);
         return response;
@@ -217,7 +225,7 @@ export const editPost = (post_id, title, body, categories) => (dispatch) => {
 }
 
 // sends attempt to delete a post to the backend
-export const deletePost = (post_id) => (dispatch) => {
+export const deletePost = (post_id: number) => (dispatch: AppDispatch) => {
     const token = 'Bearer ' + localStorage.getItem('token');
     fetch(baseUrl + 'posts/' + post_id.toString(), {
         method: 'DELETE',
@@ -238,7 +246,7 @@ export const deletePost = (post_id) => (dispatch) => {
                 alert("Error deleting post")
             }
             var err = new Error('Error' + response.status + ": " + response.statusText);
-            err.response = response;
+            err.message = response.statusText;
             throw err;
         }
     })
@@ -249,7 +257,7 @@ export const deletePost = (post_id) => (dispatch) => {
 }
 
 // sends attempt to like a post
-export const likePost = (user_id, post_id, user) => (dispatch) => {
+export const likePost = (user_id: number, post_id: number, liked: Array<PostInterface>, disliked: Array<PostInterface>) => (dispatch: AppDispatch) => {
     const token = 'Bearer ' + localStorage.getItem('token');
     const newLike = {
         user_id: user_id,
@@ -265,24 +273,24 @@ export const likePost = (user_id, post_id, user) => (dispatch) => {
         credentials: 'same-origin'
     })
     .then(response => {
-        // console.log(response);
         if (response.ok) {
             return response
         } else {
             var err = new Error('Error' + response.status + ": " + response.statusText);
-            err.response = response;
+            err.message = response.statusText;
             throw err;
         }
     })
     .then(response => response.json())
     .then(response => {
-        user = JSON.parse(JSON.stringify(user));
+        liked = JSON.parse(JSON.stringify(liked));
+        disliked = JSON.parse(JSON.stringify(disliked));
         if (Object.keys(response).length !== 0) {
-            user.liked.push(response);
-            user.disliked = user.disliked.filter(post => post.id !== post_id);
-            dispatch(userSuccess({user: user}));
+            liked.push(response);
+            disliked = disliked.filter(post => post.id !== post_id);
+            dispatch(updateUserLiked({liked: liked}));
+            dispatch(updateUserDisliked({disliked: disliked}))
         }
-        // console.log(response);
     })
     .catch((err) => {
         console.log(err);
@@ -291,7 +299,7 @@ export const likePost = (user_id, post_id, user) => (dispatch) => {
 }
 
 // sends attempt to unlike a post
-export const unlikePost = (user_id, post_id, user) => (dispatch) => {
+export const unlikePost = (user_id: number, post_id: number, liked: Array<PostInterface>) => (dispatch: AppDispatch) => {
     const token = 'Bearer ' + localStorage.getItem('token');
     const like = {
         user_id: user_id,
@@ -308,13 +316,13 @@ export const unlikePost = (user_id, post_id, user) => (dispatch) => {
     })
     .then(response => {
         if (response.ok) {
-            user = JSON.parse(JSON.stringify(user))
-            user.liked = user.liked.filter(post => post.id !== post_id);
-            dispatch(userSuccess({user: user}));
+            liked = JSON.parse(JSON.stringify(liked))
+            liked = liked.filter(post => post.id !== post_id);
+            dispatch(updateUserLiked({liked: liked}));
             return response
         } else {
             var err = new Error('Error' + response.status + ": " + response.statusText);
-            err.response = response;
+            err.message = response.statusText;
             throw err;
         }
     })
@@ -325,7 +333,7 @@ export const unlikePost = (user_id, post_id, user) => (dispatch) => {
 }
 
 // sends attempt to dislike a post
-export const dislikePost = (user_id, post_id, user) => (dispatch) => {
+export const dislikePost = (user_id: number, post_id: number, disliked: Array<PostInterface>, liked: Array<PostInterface>) => (dispatch: AppDispatch) => {
     const token = 'Bearer ' + localStorage.getItem('token');
     const newDislike = {
         user_id: user_id,
@@ -346,17 +354,19 @@ export const dislikePost = (user_id, post_id, user) => (dispatch) => {
             return response
         } else {
             var err = new Error('Error' + response.status + ": " + response.statusText);
-            err.response = response;
+            err.message = response.statusText;
             throw err;
         }
     })
     .then(response => response.json())
     .then(response => {
-        user = JSON.parse(JSON.stringify(user));
+        liked = JSON.parse(JSON.stringify(liked));
+        disliked = JSON.parse(JSON.stringify(disliked));
         if (Object.keys(response).length !== 0) {
-            user.disliked.push(response);
-            user.liked = user.liked.filter(post => post.id !== post_id);
-            dispatch(userSuccess({user: user}));
+            disliked.push(response);
+            liked = liked.filter(post => post.id !== post_id);
+            dispatch(updateUserLiked({liked: liked}));
+            dispatch(updateUserDisliked({disliked: disliked}));
         }
         // console.log(response);
     })
@@ -367,7 +377,7 @@ export const dislikePost = (user_id, post_id, user) => (dispatch) => {
 }
 
 // sends attempt to unlike a post
-export const undislikePost = (user_id, post_id, user) => (dispatch) => {
+export const undislikePost = (user_id: number, post_id: number, disliked: Array<PostInterface>) => (dispatch: AppDispatch) => {
     const token = 'Bearer ' + localStorage.getItem('token');
     const dislike = {
         user_id: user_id,
@@ -383,14 +393,15 @@ export const undislikePost = (user_id, post_id, user) => (dispatch) => {
         credentials: 'same-origin'
     })
     .then(response => {
+        console.log(response);
         if (response.ok) {
-            user = JSON.parse(JSON.stringify(user))
-            user.disliked = user.liked.filter(post => post.id !== post_id);
-            dispatch(userSuccess({user: user}));
+            disliked = JSON.parse(JSON.stringify(disliked))
+            disliked = disliked.filter(post => post.id !== post_id);
+            dispatch(updateUserDisliked({disliked: disliked}));
             return response
         } else {
             var err = new Error('Error' + response.status + ": " + response.statusText);
-            err.response = response;
+            err.message = response.statusText;
             throw err;
         }
     })
@@ -401,7 +412,7 @@ export const undislikePost = (user_id, post_id, user) => (dispatch) => {
 }
 
 // sends attempt to save a post
-export const savePost = (user_id, post_id, user) => (dispatch) => {
+export const savePost = (user_id: number, post_id: number, saved: Array<PostInterface>) => (dispatch: AppDispatch) => {
     const token = 'Bearer ' + localStorage.getItem('token');
     const newSave = {
         user_id: user_id,
@@ -422,16 +433,16 @@ export const savePost = (user_id, post_id, user) => (dispatch) => {
             return response
         } else {
             var err = new Error('Error' + response.status + ": " + response.statusText);
-            err.response = response;
+            err.message = response.statusText;
             throw err;
         }
     })
     .then(response => response.json())
     .then(response => {
-        user = JSON.parse(JSON.stringify(user))
+        saved = JSON.parse(JSON.stringify(saved))
         if (Object.keys(response).length !== 0) {
-            user.saved.push(response);
-            dispatch(userSuccess({user: user}));
+            saved.push(response);
+            dispatch(updateUserSaved({saved: saved}));
         }
         // console.log(response);
     })
@@ -442,7 +453,7 @@ export const savePost = (user_id, post_id, user) => (dispatch) => {
 }
 
 // sends attempt to unlike a post
-export const unsavePost = (user_id, post_id, user) => (dispatch) => {
+export const unsavePost = (user_id: number, post_id: number, saved: Array<PostInterface>) => (dispatch: AppDispatch) => {
     const token = 'Bearer ' + localStorage.getItem('token');
     const save = {
         user_id: user_id,
@@ -459,13 +470,13 @@ export const unsavePost = (user_id, post_id, user) => (dispatch) => {
     })
     .then(response => {
         if (response.ok) {
-            user = JSON.parse(JSON.stringify(user))
-            user.saved = user.saved.filter(post => post.id !== post_id);
-            dispatch(userSuccess({user: user}));
+            saved = JSON.parse(JSON.stringify(saved))
+            saved = saved.filter(post => post.id !== post_id);
+            dispatch(updateUserSaved({saved: saved}));
             return response
         } else {
             var err = new Error('Error' + response.status + ": " + response.statusText);
-            err.response = response;
+            err.message = response.statusText;
             throw err;
         }
     })
@@ -479,7 +490,7 @@ export const unsavePost = (user_id, post_id, user) => (dispatch) => {
 // functions for replies
 
 // sends attempt to create new reply to the backend
-export const postNewReply = (body, user_id, post_id) => (dispatch) => {
+export const postNewReply = (body: string, user_id: number, post_id: number) => (dispatch: AppDispatch) => {
     const token = 'Bearer ' + localStorage.getItem('token');
     const newReply = {
         body: body,
@@ -501,14 +512,13 @@ export const postNewReply = (body, user_id, post_id) => (dispatch) => {
             return response
         } else {
             var err = new Error('Error' + response.status + ": " + response.statusText);
-            err.response = response;
+            err.message = response.statusText;
             throw err;
         }
     })
     .then(response => response.json())
     .then(response => {
-        console.log(response);
-        // dispatch(fetchPosts());
+        // console.log(response);
         return response;
     })
     .catch((err) => {
@@ -518,7 +528,7 @@ export const postNewReply = (body, user_id, post_id) => (dispatch) => {
 }
 
 // send attempt to edit post to the backend
-export const editReply = (reply_id, body) => (dispatch) => {
+export const editReply = (reply_id: number, body: string) => (dispatch: AppDispatch) => {
     // console.log(categories);
     const token = 'Bearer ' + localStorage.getItem('token');
     const edits = {
@@ -539,7 +549,7 @@ export const editReply = (reply_id, body) => (dispatch) => {
             return response
         } else {
             var err = new Error('Error' + response.status + ": " + response.statusText);
-            err.response = response;
+            err.message = response.statusText;
             throw err;
         }
     })
@@ -548,7 +558,7 @@ export const editReply = (reply_id, body) => (dispatch) => {
         // console.log(response);
         // dispatch(fetchPosts());
         alert("Reply edited");
-        console.log(response);
+        // console.log(response);
         return response;
     })
     .catch((err) => {
@@ -558,7 +568,7 @@ export const editReply = (reply_id, body) => (dispatch) => {
 }
 
 // sends attempt to delete a reply to the backend
-export const deleteReply = (reply_id) => (dispatch) => {
+export const deleteReply = (reply_id: number) => (dispatch: AppDispatch) => {
     const token = 'Bearer ' + localStorage.getItem('token');
     fetch(baseUrl + 'replies/' + reply_id.toString(), {
         method: 'DELETE',
@@ -576,10 +586,10 @@ export const deleteReply = (reply_id) => (dispatch) => {
             if (response.status === 404) {
                 alert("Reply does not exist");
             } else {
-                alert("Error deleting post")
+                alert("Error deleting post");
             }
             var err = new Error('Error' + response.status + ": " + response.statusText);
-            err.response = response;
+            err.message = response.statusText;
             throw err;
         }
     })

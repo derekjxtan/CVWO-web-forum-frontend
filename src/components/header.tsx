@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 
-import { useSelector, useDispatch } from "react-redux";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+
+import { Link, useNavigate } from "react-router-dom";
 
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
@@ -9,21 +11,17 @@ import Button from 'react-bootstrap/Button';
 import Modal  from "react-bootstrap/Modal";
 import Form from 'react-bootstrap/Form';
 
-import { login, logout, register } from "../reducers/userSlice";
-
-import { Link, useNavigate } from "react-router-dom";
-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
 import { solid } from "@fortawesome/fontawesome-svg-core/import.macro";
 
+import { login, logout, register } from "../reducers/userSlice";
 
 
 export const Header = () => {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
 
-    const userStatus = useSelector(state => state.user)
+    const userStatus = useAppSelector(state => state.user)
 
     const [showLogin, setLogin] = useState(false);
     const [showRegister, setRegister] = useState(false);
@@ -31,35 +29,43 @@ export const Header = () => {
     const toggleLogin = () => setLogin(!showLogin);
     const toggleRegister = () => setRegister(!showRegister);
 
-    // called when user attempts to log in
+    // called when user attempts to login into an accound
     // dispatches login function from userSlice
-    const loginUser = (e) => {
+    const loginUser = (e: React.SyntheticEvent) => {
         e.preventDefault();
-        dispatch(login(e.target[1].value, e.target[2].value));
-        navigate();
+        const target = e.target as typeof e.target & {
+            username: {value: string};
+            password: {value: string};
+        };
+        dispatch(login(target.username.value, target.password.value));
     }
 
     // called when user attempts to register a new account
     // dispatches register function from userSlice
-    const handleRegister = (e) => {
+    const handleRegister = (e: React.SyntheticEvent) => {
         e.preventDefault();
-        // console.log(e.target[1].value, e.target[2].value);
-        dispatch(register(e.target[1].value, e.target[2].value));
-        navigate();
+        const target = e.target as typeof e.target & {
+            username: {value: string};
+            password: {value: string};
+        };
+        dispatch(register(target.username.value, target.password.value));
     }
 
     // called when user attempts to log out
     // dispatches logout function from userSlice
-    const logoutUser = (e) => {
+    const logoutUser = (e: React.SyntheticEvent) => {
         e.preventDefault();
         dispatch(logout());
-        navigate();
+        navigate(0);
     }
 
     // format url and navigate to categories
-    const searchCategories = (e) => {
-        // console.log(e.target[0].value);
-        let categories = e.target[0].value.split(' ');
+    const searchCategories = (e: React.SyntheticEvent) => {
+        e.preventDefault();
+        const target = e.target as typeof e.target & {
+            search: {value: string};
+        }
+        let categories = target.search.value.trim().split(' ');
         let path = `/categories/`;
         for (let i = 0; i < categories.length; i++) {
             const currCat = categories[i].trim();
@@ -75,7 +81,7 @@ export const Header = () => {
     }
 
     return (
-        <Navbar expand='lg'>
+        <Navbar expand='lg' sticky="top">
             <Container>
                 <Navbar.Brand href='/'>Gossip</Navbar.Brand>
                 <Navbar.Toggle aria-controls='basic-navbar'/>
@@ -101,12 +107,15 @@ export const Header = () => {
                         userStatus.isAuthenticated
                         ?
                             <Nav className="ms-auto">
-                                <Form className="d-flex me-3" onSubmit={searchCategories}>
-                                    <Form.Control type='search' placeholder="Search Categories" className="me-2" />
-                                    <Button variant="outline-dark" type="submit"><FontAwesomeIcon icon={solid('magnifying-glass')} size='lg'/></Button>
+                                <Form onSubmit={searchCategories}>
+                                    <Form.Group className="d-flex me-3" controlId="search">
+                                        <Form.Control type='search' placeholder="Search Categories" className="me-2" />
+                                        <Button variant="outline-dark" type="submit"><FontAwesomeIcon icon={solid('magnifying-glass')}/></Button>
+                                    </Form.Group>
                                 </Form>
-                                <Nav.Link href={`/users/${userStatus.user.id}`} className='btn me-2'>
-                                    <FontAwesomeIcon icon={solid('user')}/> {userStatus.user.username}
+                                {/* <Nav.Link href={`/users/${userStatus.user!['id']}`} className='btn me-2'> */}
+                                <Nav.Link href={`/users/${userStatus.id}`} className='btn me-2'>
+                                    <FontAwesomeIcon icon={solid('user')}/> {userStatus.username}
                                 </Nav.Link>
                                 <Button variant="primary" className="" onClick={logoutUser}>
                                     <FontAwesomeIcon icon={solid('right-from-bracket')}/> Log out
@@ -115,9 +124,11 @@ export const Header = () => {
                         :
                             <div>
                                 <Nav>
-                                    <Form className="d-flex me-3" onSubmit={searchCategories}>
-                                        <Form.Control type='search' placeholder="Search Categories" className="me-2" />
-                                        <Button variant="outline-dark" type="submit"><FontAwesomeIcon icon={solid('magnifying-glass')}/></Button>
+                                    <Form onSubmit={searchCategories}>
+                                        <Form.Group className="d-flex me-3" controlId="search">
+                                            <Form.Control type='search' placeholder="Search Categories" className="me-2" />
+                                            <Button variant="outline-dark" type="submit"><FontAwesomeIcon icon={solid('magnifying-glass')}/></Button>
+                                        </Form.Group>
                                     </Form>
                                     <Button variant="primary" onClick={toggleLogin}>
                                         <FontAwesomeIcon icon={solid('right-to-bracket')}/> Log in
@@ -133,11 +144,11 @@ export const Header = () => {
                                             <Modal.Title>Login</Modal.Title>
                                         </Modal.Header>
                                         <Modal.Body>
-                                            <Form.Group className="mb-3" controlId="formUsername">
+                                            <Form.Group className="mb-3" controlId="username">
                                                 <Form.Label>Username</Form.Label>
                                                 <Form.Control type="text" placeholder="Username" required/>
                                             </Form.Group>
-                                            <Form.Group className="mb-3" controlId="formPassword">
+                                            <Form.Group className="mb-3" controlId="password">
                                                 <Form.Label>Password</Form.Label>
                                                 <Form.Control type="password" placeholder="Password" required/>
                                             </Form.Group>
@@ -159,11 +170,11 @@ export const Header = () => {
                                             <Modal.Title>Register</Modal.Title>
                                         </Modal.Header>
                                         <Modal.Body>
-                                            <Form.Group className="mb-3" controlId="formUsername">
+                                            <Form.Group className="mb-3" controlId="username">
                                                 <Form.Label>Username</Form.Label>
                                                 <Form.Control type="text" placeholder="Username" required />
                                             </Form.Group>
-                                            <Form.Group className="mb-3" controlId="formPassword">
+                                            <Form.Group className="mb-3" controlId="password">
                                                 <Form.Label>Password</Form.Label>
                                                 <Form.Control type="password" placeholder="Password" required />
                                             </Form.Group>

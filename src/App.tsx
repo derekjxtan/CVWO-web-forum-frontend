@@ -12,13 +12,13 @@ import { EditPostForm } from './components/editPostForm';
 import { Categories } from './components/categories';
 import { EditReplyForm } from './components/editReplyForm';
 
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from './app/hooks';
 
 import { checkLogin } from './reducers/userSlice';
 
 
 function App() {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   // check login status whenever page is reloaded
   useEffect(() => {
@@ -31,12 +31,11 @@ function App() {
         <Header />
         <Routes>
           <Route path='/' element={<HomePage />} />
-          {/* <Route path='/' element={<Posts />} /> */}
-          <Route exact path='posts/:postId' element={<Post />} />
-          <Route exact path='posts/:postId/edit' element={<EditPostForm />} />
-          <Route exact path='/new' element={<NewPostForm />} />
-          <Route exact path='users/:userId' element={<Profile />} />
-          <Route exact path='users/:userId/replies/:replyId/edit' element={<EditReplyForm />} />
+          <Route path='posts/:postId' element={<Post />} />
+          <Route path='posts/:postId/edit' element={<EditPostForm />} />
+          <Route path='/new' element={<NewPostForm />} />
+          <Route path='users/:userId' element={<Profile />} />
+          <Route path='users/:userId/replies/:replyId/edit' element={<EditReplyForm />} />
           <Route path='categories/:categories' element={<Categories />} />
           <Route path='*' element={<Navigate to='/' />} />
         </Routes>

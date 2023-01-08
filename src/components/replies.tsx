@@ -1,33 +1,38 @@
+import { useAppDispatch } from '../app/hooks';
+
+import { Link, useNavigate } from 'react-router-dom';
+
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Card from 'react-bootstrap/Card';
 
-import { Link, useNavigate } from 'react-router-dom';
-
-import { useDispatch } from 'react-redux';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { solid } from "@fortawesome/fontawesome-svg-core/import.macro";
 
 import { deleteReply } from '../reducers/postsSlice';
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
-import { solid } from "@fortawesome/fontawesome-svg-core/import.macro";
+import { ReplyInterface } from '../app/interfaces';
 
 
-export const Replies = (props) => {
-    const dispatch = useDispatch();
+interface Props {
+    replies: Array<ReplyInterface>
+}
+
+export const Replies = (props: Props) => {
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
 
     const replies = props.replies;
 
     // called when attempting to delete a reply
     // dispatches deleteReply function from postsSlice
-    const handleDelete = (reply_id) => {
+    const handleDelete = (reply_id: number) => {
         alert("Deleting reply " + reply_id);
         dispatch(deleteReply(reply_id));
-        navigate();
+        navigate(0);
     }
 
-    const singleReply = (reply) => (
+    const singleReply = (reply: ReplyInterface) => (
         <Card className="mt-3" key={reply.id}>
             <Card.Header>
                 <Card.Subtitle className="d-flex justify-content-start">{reply.created_at}</Card.Subtitle>

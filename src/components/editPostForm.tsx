@@ -1,44 +1,48 @@
-import React, { useEffect } from "react";
+import React, { SyntheticEvent, useEffect } from "react";
 
-import { useDispatch, useSelector } from "react-redux";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
 
 import { useNavigate, useParams } from "react-router-dom";
-
-import { editPost, fetchPost } from "../reducers/postsSlice";
 
 import Container from "react-bootstrap/Container";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
 import { solid } from "@fortawesome/fontawesome-svg-core/import.macro";
+
+import { editPost, fetchPost } from "../reducers/postsSlice";
+
 import { LoadingSpinner } from "./loading";
 import { Error } from "./error";
 
 
 export const EditPostForm = () => {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const params = useParams();
     const navigate = useNavigate();
 
-    const postId =  parseInt(params.postId);
+    const postId =  parseInt(params.postId!);
 
     useEffect(() => {
         dispatch(fetchPost(postId));
     }, [dispatch, postId])
 
-    const postsStatus = useSelector(state => state.posts);
+    const postsStatus = useAppSelector(state => state.posts);
     const post = postsStatus.posts.find(post => post.id === postId);
 
-    const userStatus = useSelector(state => state.user);
+    const userStatus = useAppSelector(state => state.user);
 
     // called when attempting to edit a post
-    const handleEdit = (e) => {
-        // console.log(e.target[0].value, e.target[1].value);
+    const handleEdit = (e: SyntheticEvent) => {
         e.preventDefault();
-        dispatch(editPost(postId, e.target[0].value, e.target[1].value, e.target[2].value));
-        navigate(`/posts/${postId}`);
+        const target = e.target as typeof e.target & {
+            title: {value: string};
+            body: {value: string};
+            categories: {value: string}
+        };
+        dispatch(editPost(postId, target.title.value, target.body.value, target.categories.value));
+        navigate(-1);
     }
 
     // callled when cancel is clicked, navigates to previous page
@@ -54,7 +58,7 @@ export const EditPostForm = () => {
         return (
             <Error error={postsStatus.err} />
         );
-    } else if (userStatus.isAuthenticated && post && userStatus.user.id === post.user_id) {
+    } else if (userStatus.isAuthenticated && post && userStatus.id === post.user_id) {
         return (
             <Container className="col-8">
                 <h1 className="white-text">Edit Thread</h1>

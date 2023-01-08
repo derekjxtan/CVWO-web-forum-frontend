@@ -1,18 +1,21 @@
 import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+
 import { fetchPosts } from "../reducers/postsSlice";
+
 import { Error } from "./error";
 import { LoadingSpinner } from "./loading";
 import { Posts } from "./posts";
 
 export const HomePage = () => {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
 
     useEffect(() => {
         dispatch(fetchPosts());
     }, [dispatch])
 
-    const postsStatus = useSelector(state => state.posts)
+    const postsStatus = useAppSelector(state => state.posts)
     const posts = postsStatus.posts
     
     return (

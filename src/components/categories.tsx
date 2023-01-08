@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 
-import { useDispatch, useSelector } from "react-redux";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
 
 import { useParams } from "react-router-dom";
 
@@ -15,13 +15,13 @@ import { Error } from "./error";
 
 export const Categories = () => {
     const params = useParams();
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
 
     useEffect(() => {
-        dispatch(fetchPostsByCategory(params.categories));
+        dispatch(fetchPostsByCategory(params.categories!));
     }, [dispatch, params]);
 
-    const postsStatus = useSelector(state => state.posts);
+    const postsStatus = useAppSelector(state => state.posts);
     const posts = postsStatus.posts;
 
     if (postsStatus.isLoading) {
@@ -36,9 +36,9 @@ export const Categories = () => {
         return (
             <div>
                 <Container>
-                    <h1 className="mt-3 white-text">Categories: {params.categories.split('&').reduce((x, y) => x + y + ", ", "").slice(0, -2)}</h1>
+                    <h1 className="mt-3 white-text">Categories: {params.categories!.split('&').reduce((x, y) => x + y + ", ", "").slice(0, -2)}</h1>
                 </Container>
-                <Posts posts={posts} categories={params.categories}/>
+                <Posts posts={posts} />
             </div>
         )
     } else {

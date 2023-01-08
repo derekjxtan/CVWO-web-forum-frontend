@@ -1,4 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { SyntheticEvent, useEffect, useState } from "react";
+
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/Container";
@@ -7,29 +11,32 @@ import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 
-import { useDispatch, useSelector } from "react-redux";
-
-import { Link, useParams } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { solid, regular } from "@fortawesome/fontawesome-svg-core/import.macro";
 
 import { fetchPost, postNewReply, likePost, unlikePost, dislikePost, undislikePost, savePost, unsavePost } from "../reducers/postsSlice";
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
-import { solid, regular } from "@fortawesome/fontawesome-svg-core/import.macro";
 import { LoadingSpinner } from "./loading";
 import { Error } from "./error";
 
+import { PostInterface } from "../app/interfaces";
 
-const PostCard = (props) => {
+
+type Props = {
+    post: PostInterface
+}
+
+const PostCard = (props: Props) => {
     const params = useParams()
-    const dispatch = useDispatch()
+    const dispatch = useAppDispatch()
+    const navigate = useNavigate();
     
     const post = props.post;
     const postId = post.id;
     const date = new Date(post.created_at);
     const replies = post.replies
 
-    const userStatus = useSelector(state => state.user);
+    const userStatus = useAppSelector(state => state.user);
 
     const [like, setLike] = useState(false);
     const [dislike, setDislike] = useState(false);
@@ -39,10 +46,11 @@ const PostCard = (props) => {
     const [dislikes, setDislikes] = useState(post.dislikes);
 
     useEffect(() => {
+        // check whether post has been liked, disliked or saved
         if (userStatus.isAuthenticated && post) {
-            setLike(userStatus.user.liked.find(item => item.id === post.id) === undefined);
-            setDislike(userStatus.user.disliked.find(item => item.id === post.id) === undefined);
-            setSave(userStatus.user.saved.find(item => item.id === post.id) === undefined);
+            setLike(userStatus.liked.find(item => item.id === post.id) === undefined);
+            setDislike(userStatus.disliked.find(item => item.id === post.id) === undefined);
+            setSave(userStatus.saved.find(item => item.id === post.id) === undefined);
         }
     }, [userStatus, post, params]);
 
@@ -55,11 +63,11 @@ const PostCard = (props) => {
         if (like) {
             setLikes(likes + 1);
             setLike(false);
-            dispatch(likePost(userStatus.user.id, postId, userStatus.user));
+            dispatch(likePost(userStatus.id!, postId, userStatus.liked, userStatus.disliked));
         } else {
             setLikes(likes - 1);
             setLike(true);
-            dispatch(unlikePost(userStatus.user.id, postId, userStatus.user));
+            dispatch(unlikePost(userStatus.id!, postId, userStatus.liked));
         }
     }
 
@@ -72,46 +80,51 @@ const PostCard = (props) => {
         if (dislike) {
             setDislikes(dislikes + 1);
             setDislike(false);
-            dispatch(dislikePost(userStatus.user.id, postId, userStatus.user));
+            dispatch(dislikePost(userStatus.id!, postId, userStatus.disliked, userStatus.liked));
         } else {
             setDislikes(dislikes - 1);
             setDislike(true);
-            dispatch(undislikePost(userStatus.user.id, postId, userStatus.user));
+            dispatch(undislikePost(userStatus.id!, postId, userStatus.disliked));
         }
     }
 
     // checks whether post has already been saved by user. If so call savePost, otherwise call unsavePost
     const handleSave = () => {
         if (save) {
-            dispatch(savePost(userStatus.user.id, postId, userStatus.user));
+            dispatch(savePost(userStatus.id!, postId, userStatus.saved));
             setSave(false);
         } else {
-            dispatch(unsavePost(userStatus.user.id, postId, userStatus.user));
+            dispatch(unsavePost(userStatus.id!, postId, userStatus.saved));
             setSave(true);
         }
     }
 
     // called when attempting to post a new reply
-    const postForm = (e) => {
-        alert(e.target[0].value)
+    const postForm = (e: SyntheticEvent) => {
+        e.preventDefault();
+        const target = e.target as typeof e.target & {
+            body: {value: string};
+        };
         if (userStatus.isAuthenticated) {
             dispatch(postNewReply(
-                e.target[0].value,
-                userStatus.user.id,
+                target.body.value,
+                userStatus.id!,
                 postId
             ));
+            navigate(0);
         } else {
             alert("You are not logged in, login before trying again");
+            navigate(0);
         }
     }
 
-    const repliesList = replies.map(reply => {
+    const repliesList = replies!.map(reply => {
         const replyDate = new Date(reply.created_at);
         return (
             <Container className="box" key={reply.id}>
                 <Card.Text className="d-flex justify-content-start">{reply.body}</Card.Text>
                 <Card.Text className="d-flex justify-content-end">
-                    @<Link to={`/users/${reply.user.id}`}>{reply.user.username}</Link>, {replyDate.toLocaleTimeString() + ", " + replyDate.toLocaleDateString()}
+                    @<Link to={`/users/${reply.user!.id}`}>{reply.user!.username}</Link>, {replyDate.toLocaleTimeString() + ", " + replyDate.toLocaleDateString()}
                 </Card.Text>
             </Container>
         );
@@ -172,7 +185,7 @@ const PostCard = (props) => {
                 </Col>
             </Row>
                 <Card.Subtitle className="d-flex justify-content-start">
-                    @<Link to={`/users/${post.user.id}`}>{post.user.username}</Link>, {date.toLocaleTimeString() + ", " + date.toLocaleDateString()}
+                    @<Link to={`/users/${post.user!.id}`}>{post.user!.username}</Link>, {date.toLocaleTimeString() + ", " + date.toLocaleDateString()}
                 </Card.Subtitle>
             <Card.Subtitle className="d-flex justify-content-start mt-1">Categories: {post.categories.reduce((x, y) => x + y + ", ", "").slice(0,-2)}</Card.Subtitle>
         </Card.Header>
@@ -184,7 +197,9 @@ const PostCard = (props) => {
                         <Form onSubmit={postForm}>
                             <Form.Group className="mb-3" controlId="formReply">
                                 <Row>
-                                    <Form.Control as="textarea" placeholder="Reply to the post" rows={5} required/>
+                                    <Form.Group className="mb-3" controlId="body">
+                                        <Form.Control as="textarea" placeholder="Reply to the post" rows={5} required/>
+                                    </Form.Group>
                                     <div className="d-flex justify-content-end">
                                         <Button type="submit" className="mt-2">
                                             <FontAwesomeIcon icon={solid('reply')}/> Reply
@@ -204,12 +219,11 @@ const PostCard = (props) => {
 
 export const Post = () => {
     const params = useParams()
-    const dispatch = useDispatch()
+    const dispatch = useAppDispatch()
     
-    const postId = parseInt(params.postId)
+    const postId = parseInt(params.postId!)
 
-    // const post = useSelector(state => state.posts.posts.find(post => post.id === postId))
-    const postsStatus = useSelector(state => state.posts);
+    const postsStatus = useAppSelector(state => state.posts);
     const post = postsStatus.posts.find(post => post.id === postId);
 
     useEffect(() => {

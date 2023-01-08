@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+
+import { Link } from "react-router-dom";
 
 import Card  from "react-bootstrap/Card";
 import Col  from "react-bootstrap/Col";
@@ -7,17 +10,25 @@ import Row from "react-bootstrap/Row";
 import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/Container";
 
-import { Link } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { solid, regular } from "@fortawesome/fontawesome-svg-core/import.macro";
 
 import { likePost, unlikePost, dislikePost, undislikePost, savePost, unsavePost, deletePost } from "../reducers/postsSlice";
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { PostInterface } from "../app/interfaces";
 
-import { solid, regular } from "@fortawesome/fontawesome-svg-core/import.macro";
 
-const SinglePost = (props) => {
+interface SinglePostProps {
+    post: PostInterface;
+    handleLike(id: number, like: boolean): void;
+    handleDislike(id: number, dislike: boolean): void;
+    handleSave(id: number, save: boolean): void;
+    handleDelete(id: number): void;
+}
+
+const SinglePost = (props: SinglePostProps) => {
     const post = props.post;
-    const userStatus = useSelector(state => state.user);
+    const userStatus = useAppSelector(state => state.user);
 
     const [like, setLike] = useState(false);
     const [dislike, setDislike] = useState(false);
@@ -27,13 +38,16 @@ const SinglePost = (props) => {
     const [dislikes, setDislikes] = useState(post.dislikes);
 
     useEffect(() => {
+        // whether post has been liked, disliked or saved
         if (userStatus.isAuthenticated) {
-            setLike(userStatus.user.liked.find(item => item.id === post.id) === undefined);
-            setDislike(userStatus.user.disliked.find(item => item.id === post.id) === undefined);
-            setSave(userStatus.user.saved.find(item => item.id === post.id) === undefined);
+            setLike(userStatus.liked.find(item => item.id === post.id) === undefined);
+            setDislike(userStatus.disliked.find(item => item.id === post.id) === undefined);
+            setSave(userStatus.saved.find(item => item.id === post.id) === undefined);
         }
     }, [userStatus, post.id])
 
+    // called when like is clicked
+    // passes required parameters to handleLike declared in Posts component and make changes to the state locally
     const handleLike = () => {
         props.handleLike(props.post.id, like);
         if (like && !dislike) {
@@ -49,9 +63,11 @@ const SinglePost = (props) => {
         }
     }
 
+    // called when dislike is clicked
+    // passes required parameters to handleDislike declared in Posts component and make changes to the state locally
     const handleDislike = () => {
         props.handleDislike(props.post.id, dislike);
-        if (dislike & !like) {
+        if (dislike && !like) {
             setLikes(likes - 1)
             setLike(true);
         } 
@@ -64,11 +80,15 @@ const SinglePost = (props) => {
         }
     }
 
+    // called when save is clicked
+    // passes required parameters to handleSave declared in Posts component and make changes to the state locally
     const handleSave = () => {
         props.handleSave(props.post.id, save);
         setSave(!save);
     }
 
+    // called when liked is clicked
+    // passes required parameters to handleDelete declared in Posts component
     const handleDelete = () => {
         props.handleDelete(props.post.id);
     }
@@ -84,7 +104,7 @@ const SinglePost = (props) => {
                     </Col>
                     <Col className="d-flex justify-content-end">
                         {
-                            userStatus.isAuthenticated && userStatus.user.id === post.user.id
+                            userStatus.isAuthenticated && userStatus.id === post.user!.id
                             ?
                                 <div>
                                     <Link to={`/posts/${post.id}/edit`} className='btn btn-outline-dark button-plain'>
@@ -105,7 +125,7 @@ const SinglePost = (props) => {
                     </Col>
                 </Row>
                     <Card.Subtitle className="d-flex justify-content-start">
-                        @<Link to={`/users/${post.user.id}`}>{post.user.username}</Link>, {date.toLocaleTimeString() + ", " + date.toLocaleDateString()}
+                        @<Link to={`/users/${post.user!.id}`}>{post.user!.username}</Link>, {date.toLocaleTimeString() + ", " + date.toLocaleDateString()}
                     </Card.Subtitle>
                 <Card.Subtitle className="d-flex justify-content-start mt-1">Categories: {post.categories.reduce((x, y) => x + y + ", ", "").slice(0,-2)}</Card.Subtitle>
             </Card.Header>
@@ -161,14 +181,20 @@ const SinglePost = (props) => {
     )
 }
 
-export const Posts = (props) => {
-    const dispatch = useDispatch();
+
+interface PostsProps {
+    posts: Array<PostInterface>;
+}
+
+export const Posts = (props: PostsProps) => {
+    const dispatch = useAppDispatch();
 
     const [order, setOrder] = useState(0);
 
     const posts = props.posts;
-    const userStatus = useSelector(state => state.user);
+    const userStatus = useAppSelector(state => state.user);
 
+    // update order state
     const sortLatest = () => {
         if (order !== 0) {
             setOrder(0);
@@ -176,6 +202,7 @@ export const Posts = (props) => {
         } 
     }
 
+    // update order state
     const sortEarliest = () => {
         if (order !== 1) {
             setOrder(1);
@@ -188,13 +215,13 @@ export const Posts = (props) => {
         const postCopy = JSON.parse(JSON.stringify(posts))
         // Latest to Earliest by date
         if (order === 0) {
-            postCopy.sort((a, b) => {
+            postCopy.sort((a: PostInterface, b: PostInterface) => {
                 return Date.parse(b.created_at) - Date.parse(a.created_at);
             });
         }
         // Earliest to Latest by date
         else {
-            postCopy.sort((a, b) => {
+            postCopy.sort((a: PostInterface, b: PostInterface) => {
                 return Date.parse(a.created_at) - Date.parse(b.created_at);
             });
         }
@@ -202,40 +229,40 @@ export const Posts = (props) => {
     }
 
     // checks whether post has already been liked by user. If so call likePost, otherwise call unlikePost
-    const handleLike = (post_id, like) => {
+    const handleLike = (post_id: number, like: boolean) => {
         if (like) {
-            dispatch(likePost(userStatus.user.id, post_id, userStatus.user));
+            dispatch(likePost(userStatus.id!, post_id, userStatus.liked, userStatus.disliked));
         } else {
-            dispatch(unlikePost(userStatus.user.id, post_id, userStatus.user));
+            dispatch(unlikePost(userStatus.id!, post_id, userStatus.liked));
         }
     }
 
     // checks whether post has already been disliked by user. If so call dislikePost, otherwise call undislikePost
-    const handleDislike = (post_id, dislike) => {
+    const handleDislike = (post_id: number, dislike: boolean) => {
         if (dislike) {
-            dispatch(dislikePost(userStatus.user.id, post_id, userStatus.user));
+            dispatch(dislikePost(userStatus.id!, post_id, userStatus.disliked, userStatus.liked));
         } else {
-            dispatch(undislikePost(userStatus.user.id, post_id, userStatus.user));
+            dispatch(undislikePost(userStatus.id!, post_id, userStatus.disliked));
         }
     }
 
     // checks whether post has already been saved by user. If so call savePost, otherwise call unsavePost
-    const handleSave = (post_id, save) => {
+    const handleSave = (post_id: number, save: boolean) => {
         if (save) {
-            dispatch(savePost(userStatus.user.id, post_id, userStatus.user));
+            dispatch(savePost(userStatus.id!, post_id, userStatus.saved));
         } else {
-            dispatch(unsavePost(userStatus.user.id, post_id, userStatus.user));
+            dispatch(unsavePost(userStatus.id!, post_id, userStatus.saved));
         }
     }
 
     // called when attempting to delete a post
     // dispatches deletePost function from postsSlice
-    const handleDelete = (post_id) => {
+    const handleDelete = (post_id: number) => {
         alert("Deleting post " + post_id);
         dispatch(deletePost(post_id));
     }
 
-    const postsList = sortPosts().map(post => 
+    const postsList = sortPosts().map((post: PostInterface) => 
         <SinglePost post={post} 
             handleLike={handleLike} 
             handleDislike={handleDislike} 
@@ -245,7 +272,7 @@ export const Posts = (props) => {
     );
 
     return (
-        <Container className="col-8 mt-3">
+        <Col lg={8} xs={12} className='container mt-3'>
             <Row>
                 <Container>
                     <Button variant="primary" className="float-end" onClick={sortEarliest} active={order === 1}>Earliest</Button>
@@ -255,6 +282,6 @@ export const Posts = (props) => {
             <Container>
                 {postsList}
             </Container>
-        </Container>
+        </Col>
     )
 }

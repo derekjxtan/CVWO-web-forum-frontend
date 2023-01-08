@@ -1,7 +1,7 @@
 .App {
   text-align: center;
   background-color: #524632 !important;
-  min-height: 100vh !important;
+  min-height: 110vh !important;
 }
 
 .App-logo {
@@ -94,6 +94,10 @@
 
 .navbar {
   background-color: #AAB592 !important;
+}
+
+.navbar-brand {
+  font-size: 1.5rem !important;
 }
 
 .white-text {
