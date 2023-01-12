@@ -14,7 +14,7 @@ interface PostsState {
 }
 
 const initialState: PostsState = {
-    isLoading: false,
+    isLoading: true,
     err: null,
     posts: []
 }
@@ -42,10 +42,29 @@ export default postsSlice.reducer
 
 // Functions for posts
 
+function orderIntToString(order: number) {
+    var sort = "newest/";
+    switch(order) {
+        case 1:
+            sort = "oldest/";
+            break;
+        case 2:
+            sort = "most_likes/";
+            break;
+        case 3:
+            sort = "most_dislikes/";
+            break;
+        default:
+            sort = "newest/";
+    }
+    return sort;
+}
+
 // fetches all posts from backend and loads them into the store
-export const fetchPosts = () => (dispatch: AppDispatch) => {
+export const fetchPosts = (order: number = 0) => (dispatch: AppDispatch) => {
     dispatch(postsLoading());
-    fetch(baseUrl + 'posts', {
+
+    fetch(baseUrl + 'get_posts/' + orderIntToString(order), {
         method: 'GET'
     })
     .then(response => {
@@ -71,9 +90,9 @@ export const fetchPosts = () => (dispatch: AppDispatch) => {
 }
 
 // fetch posts by category from backend
-export const fetchPostsByCategory = (categories: string) => (dispatch: AppDispatch) => {
+export const fetchPostsByCategory = (categories: string, order: number = 0) => (dispatch: AppDispatch) => {
     dispatch(postsLoading());
-    fetch(baseUrl + 'categories/' + categories, {
+    fetch(baseUrl + 'categories/' + orderIntToString(order) + categories, {
         method: 'GET'
     })
     .then(response => {
@@ -94,34 +113,6 @@ export const fetchPostsByCategory = (categories: string) => (dispatch: AppDispat
     })
     .catch((err) => {
         console.log(err);
-        dispatch(postsFailed(err.message))
-        return err;
-    })
-}
-
-// fetch single post from backend
-export const fetchPost = (post_id: number) => (dispatch: AppDispatch) => {
-    dispatch(postsLoading());
-    fetch(baseUrl + 'posts/' + post_id.toString(), {
-        method: 'GET'
-    })
-    .then(response => {
-        // console.log(response);
-        if (response.ok) {
-            return response
-        } else {
-            var err = new Error('Error' + response.status + ": " + response.statusText);
-            err.message = response.statusText;
-            throw err;
-        }
-    })
-    .then(response => response.json())
-    .then(response => {
-        // console.log(response);
-        dispatch(postsSuccess([response]));
-        return response;
-    })
-    .catch((err) => {
         dispatch(postsFailed(err.message))
         return err;
     })
@@ -263,7 +254,7 @@ export const likePost = (user_id: number, post_id: number, liked: Array<PostInte
         user_id: user_id,
         post_id: post_id
     }
-    fetch(baseUrl + 'like', {
+    fetch(baseUrl + 'posts/' + post_id.toString() + '/like', {
         method: 'POST',
         headers: {
             'Authorization': token,
@@ -305,7 +296,7 @@ export const unlikePost = (user_id: number, post_id: number, liked: Array<PostIn
         user_id: user_id,
         post_id: post_id
     }
-    fetch(baseUrl + 'like', {
+    fetch(baseUrl + 'posts/' + post_id.toString() + '/like', {
         method: 'DELETE',
         headers: {
             'Authorization': token,
@@ -339,7 +330,7 @@ export const dislikePost = (user_id: number, post_id: number, disliked: Array<Po
         user_id: user_id,
         post_id: post_id
     }
-    fetch(baseUrl + 'dislike', {
+    fetch(baseUrl + 'posts/' + post_id.toString() + '/dislike', {
         method: 'POST',
         headers: {
             'Authorization': token,
@@ -383,7 +374,7 @@ export const undislikePost = (user_id: number, post_id: number, disliked: Array<
         user_id: user_id,
         post_id: post_id
     }
-    fetch(baseUrl + 'dislike', {
+    fetch(baseUrl + 'posts/' + post_id.toString() + '/dislike', {
         method: 'DELETE',
         headers: {
             'Authorization': token,
@@ -393,7 +384,6 @@ export const undislikePost = (user_id: number, post_id: number, disliked: Array<
         credentials: 'same-origin'
     })
     .then(response => {
-        console.log(response);
         if (response.ok) {
             disliked = JSON.parse(JSON.stringify(disliked))
             disliked = disliked.filter(post => post.id !== post_id);
@@ -418,7 +408,7 @@ export const savePost = (user_id: number, post_id: number, saved: Array<PostInte
         user_id: user_id,
         post_id: post_id
     }
-    fetch(baseUrl + 'save', {
+    fetch(baseUrl + 'posts/' + post_id.toString() + '/save', {
         method: 'POST',
         headers: {
             'Authorization': token,
@@ -459,7 +449,7 @@ export const unsavePost = (user_id: number, post_id: number, saved: Array<PostIn
         user_id: user_id,
         post_id: post_id
     }
-    fetch(baseUrl + 'save', {
+    fetch(baseUrl + 'posts/' + post_id.toString() + '/save', {
         method: 'DELETE',
         headers: {
             'Authorization': token,
@@ -487,114 +477,3 @@ export const unsavePost = (user_id: number, post_id: number, saved: Array<PostIn
 }
 
 
-// functions for replies
-
-// sends attempt to create new reply to the backend
-export const postNewReply = (body: string, user_id: number, post_id: number) => (dispatch: AppDispatch) => {
-    const token = 'Bearer ' + localStorage.getItem('token');
-    const newReply = {
-        body: body,
-        user_id: user_id,
-        post_id: post_id
-    }
-    fetch(baseUrl + 'replies', {
-        method: 'POST',
-        headers: {
-            'Authorization': token,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(newReply),
-        credentials: 'same-origin'
-    })
-    .then(response => {
-        // console.log(response);
-        if (response.ok) {
-            return response
-        } else {
-            var err = new Error('Error' + response.status + ": " + response.statusText);
-            err.message = response.statusText;
-            throw err;
-        }
-    })
-    .then(response => response.json())
-    .then(response => {
-        // console.log(response);
-        return response;
-    })
-    .catch((err) => {
-        console.log(err);
-        return err;
-    })
-}
-
-// send attempt to edit post to the backend
-export const editReply = (reply_id: number, body: string) => (dispatch: AppDispatch) => {
-    // console.log(categories);
-    const token = 'Bearer ' + localStorage.getItem('token');
-    const edits = {
-        body: body
-    }
-    fetch(baseUrl + 'replies/' + reply_id.toString(), {
-        method: 'PUT',
-        headers: {
-            'Authorization': token,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(edits),
-        credentials: 'same-origin'
-    })
-    .then(response => {
-        // console.log(response);
-        if (response.ok) {
-            return response
-        } else {
-            var err = new Error('Error' + response.status + ": " + response.statusText);
-            err.message = response.statusText;
-            throw err;
-        }
-    })
-    .then(response => response.json())
-    .then(response => {
-        // console.log(response);
-        // dispatch(fetchPosts());
-        alert("Reply edited");
-        // console.log(response);
-        return response;
-    })
-    .catch((err) => {
-        console.log(err);
-        return err;
-    })
-}
-
-// sends attempt to delete a reply to the backend
-export const deleteReply = (reply_id: number) => (dispatch: AppDispatch) => {
-    const token = 'Bearer ' + localStorage.getItem('token');
-    fetch(baseUrl + 'replies/' + reply_id.toString(), {
-        method: 'DELETE',
-        headers: {
-            'Authorization': token
-        }
-    })
-    .then(response => {
-        // console.log(response);
-        if (response.ok) {
-            alert("Reply sucessfully deleted");
-            dispatch(fetchPosts());
-            return response
-        } else {
-            if (response.status === 404) {
-                alert("Reply does not exist");
-            } else {
-                alert("Error deleting post");
-            }
-            var err = new Error('Error' + response.status + ": " + response.statusText);
-            err.message = response.statusText;
-            throw err;
-        }
-    })
-    .catch((err) => {
-        console.log(err);
-        return err;
-    })
-}

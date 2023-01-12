@@ -15,6 +15,8 @@ interface UserState {
     liked: Array<PostInterface>;
     disliked: Array<PostInterface>;
     saved: Array<PostInterface>;
+    liked_r: Array<ReplyInterface>;
+    disliked_r: Array<ReplyInterface>;
 }
 
 const initialState: UserState = {
@@ -27,7 +29,9 @@ const initialState: UserState = {
     replies: [],
     liked: [],
     disliked: [],
-    saved: []
+    saved: [],
+    liked_r: [],
+    disliked_r: []
 }
 
 const userSlice = createSlice({
@@ -43,6 +47,8 @@ const userSlice = createSlice({
             localStorage.setItem('liked', JSON.stringify(action.payload.liked));
             localStorage.setItem('disliked', JSON.stringify(action.payload.disliked));
             localStorage.setItem('saved', JSON.stringify(action.payload.saved));
+            localStorage.setItem('liked_r', JSON.stringify(action.payload.liked_r));
+            localStorage.setItem('disliked_r', JSON.stringify(action.payload.disliked_r));
             return {
                 ...state,
                 isLoading: false,
@@ -54,7 +60,9 @@ const userSlice = createSlice({
                 replies: action.payload.replies,
                 liked: action.payload.liked,
                 disliked: action.payload.disliked,
-                saved: action.payload.saved
+                saved: action.payload.saved,
+                liked_r: action.payload.liked_r,
+                disliked_r: action.payload.disliked_r
             }
         },
         userLoading(state) {
@@ -69,7 +77,9 @@ const userSlice = createSlice({
                 replies: [],
                 liked: [],
                 disliked: [],
-                saved: []
+                saved: [],
+                liked_r: [],
+                disliked_r: []
             }
         },
         userFailed(state, action) {
@@ -84,7 +94,9 @@ const userSlice = createSlice({
                 replies: [],
                 liked: [],
                 disliked: [],
-                saved: []
+                saved: [],
+                liked_r: [],
+                disliked_r: []
             }
         },
         removeUser(state) {
@@ -96,6 +108,8 @@ const userSlice = createSlice({
             localStorage.setItem('liked', JSON.stringify([]));
             localStorage.setItem('disliked', JSON.stringify([]));
             localStorage.setItem('saved', JSON.stringify([]));
+            localStorage.setItem('liked_r', JSON.stringify([]));
+            localStorage.setItem('disliked_r', JSON.stringify([]));
             return {
                 ...state,
                 isLoading: false,
@@ -107,7 +121,9 @@ const userSlice = createSlice({
                 replies: [],
                 liked: [],
                 disliked: [],
-                saved: []
+                saved: [],
+                liked_r: [],
+                disliked_r: []
             }
         },
         updateUserLiked(state, action) {
@@ -130,11 +146,25 @@ const userSlice = createSlice({
                 ...state,
                 saved: action.payload.saved
             }
+        },
+        updateUserLikedReplies(state, action) {
+            localStorage.setItem('liked_r', JSON.stringify(action.payload.liked_r));
+            return {
+                ...state,
+                liked_r: action.payload.liked_r
+            }
+        },
+        updateUserDislikedReplies(state, action) {
+            localStorage.setItem('disliked_r', JSON.stringify(action.payload.disliked_r));
+            return {
+                ...state,
+                disliked_r: action.payload.disliked_r
+            }
         }
     }
 })
 
-export const { userSuccess, userLoading, userFailed, removeUser, updateUserLiked, updateUserDisliked, updateUserSaved } = userSlice.actions
+export const { userSuccess, userLoading, userFailed, removeUser, updateUserLiked, updateUserDisliked, updateUserSaved, updateUserLikedReplies, updateUserDislikedReplies } = userSlice.actions
 
 export default userSlice.reducer
 
@@ -150,7 +180,9 @@ export const checkLogin = () => (dispatch: AppDispatch) => {
             replies: JSON.parse(localStorage.getItem('replies')!),
             liked: JSON.parse(localStorage.getItem('liked')!),
             disliked: JSON.parse(localStorage.getItem('disliked')!),
-            saved: JSON.parse(localStorage.getItem('saved')!)
+            saved: JSON.parse(localStorage.getItem('saved')!),
+            liked_r: JSON.parse(localStorage.getItem('liked_r')!),
+            disliked_r: JSON.parse(localStorage.getItem('disliked_r')!)
         }));
     }
     // console.log("checkLogin Called");
@@ -193,7 +225,9 @@ export const login = (username: string, password: string) => (dispatch: AppDispa
             replies: response.user.replies,
             liked: response.user.liked,
             disliked: response.user.disliked,
-            saved: response.user.saved
+            saved: response.user.saved,
+            liked_r: response.user.liked_r,
+            disliked_r: response.user.disliked_r
         }));
     })
     .catch((error) => {

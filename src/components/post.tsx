@@ -14,27 +14,180 @@ import Row from "react-bootstrap/Row";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { solid, regular } from "@fortawesome/fontawesome-svg-core/import.macro";
 
-import { fetchPost, postNewReply, likePost, unlikePost, dislikePost, undislikePost, savePost, unsavePost } from "../reducers/postsSlice";
+import { likePost, unlikePost, dislikePost, undislikePost, savePost, unsavePost } from "../reducers/postsSlice";
+import { deleteReply, dislikeReply, fetchPost, fetchPostReplies, likeReply, postNewReply, undislikeReply, unlikeReply } from "../reducers/postSlice";
 
 import { LoadingSpinner } from "./loading";
 import { Error } from "./error";
 
-import { PostInterface } from "../app/interfaces";
+import { ReplyInterface, UserInterface } from "../app/interfaces";
 
 
-type Props = {
-    post: PostInterface
+interface ReplyProps {
+    reply: ReplyInterface;
 }
 
-const PostCard = (props: Props) => {
-    const params = useParams()
+const Reply = (props: ReplyProps) => {
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
+
+    const userStatus = useAppSelector(state => state.user);
+    const reply = props.reply
+
+    const [like, setLike] = useState(false);
+    const [dislike, setDislike] = useState(false);
+
+    const [likes, setLikes] = useState(reply.likes);
+    const [dislikes, setDislikes] = useState(reply.dislikes);
+
+    useEffect(() => {
+        if (userStatus.isAuthenticated) {
+            setLike(userStatus.liked_r.find(item => item.id === reply.id) === undefined);
+            setDislike(userStatus.disliked_r.find(item => item.id === reply.id) === undefined);
+        }
+    }, [userStatus, reply])
+
+    // If currently disliked, undislike locally
+    // If currently unliked, like locally and send request to backend
+    // If currently liked, unlike locally and send request to backend
+    const handleLike = () => {
+        if (like && !dislike) {
+            setDislikes(dislikes - 1);
+            setDislike(true);
+        }
+        if (like) {
+            setLikes(likes + 1);
+            setLike(false);
+            dispatch(likeReply(reply.id, userStatus.liked_r, userStatus.disliked_r));
+        } else {
+            setLikes(likes - 1);
+            setLike(true);
+            dispatch(unlikeReply(reply.id, userStatus.liked_r))
+        }
+    }
+
+    // If currently liked, unlike locally
+    // If currently undisliked, dislike locally and send request to backend
+    // If currently disliked, undislike locally and send request to backend
+    const handleDislike = () => {
+        if (dislike && !like) {
+            setLikes(likes - 1);
+            setLike(true);
+        }
+        if (dislike) {
+            setDislikes(dislikes + 1);
+            setDislike(false);
+            dispatch(dislikeReply(reply.id, userStatus.disliked_r, userStatus.liked_r));
+        } else {
+            setDislikes(dislikes - 1);
+            setDislike(true);
+            dispatch(undislikeReply(reply.id, userStatus.disliked_r));
+        }
+    }
+
+    // calls deleteReply
+    const handleDelete = () => {
+        dispatch(deleteReply(reply.id));
+        navigate(0);
+    }
+
+    const replyDate = new Date(reply.created_at);
+
+    return (
+        <Card className="mt-3">
+            <Card.Header className="rosy-brown-bg">
+                <Row>
+                    <Col lg={5} xs={12} className="d-flex justify-content-start">
+                        <Card.Subtitle className="d-flex justify-content-start">
+                            @<Link to={`/users/${reply.user!.id}`}>{reply.user!.username}</Link>, {replyDate.toLocaleTimeString() + ", " + replyDate.toLocaleDateString()}
+                        </Card.Subtitle>
+                    </Col>
+                    <Col lg={7} xs={12} className="d-flex justify-content-end">
+                        {
+                            (userStatus.isAuthenticated && userStatus.id === reply.user!.id)
+                            ?
+                                <div>
+                                    <Link to={`/users/${userStatus.id}/replies/${reply.id}/edit`} className='btn btn-outline-dark button-plain'>
+                                        <FontAwesomeIcon icon={solid('pen')} />
+                                    </Link>
+                                    <Button variant='outline-dark' className="button-plain" onClick={handleDelete}>
+                                        <FontAwesomeIcon icon={solid('trash')}/>
+                                    </Button>
+                                </div>
+                            :
+                                <div></div>
+                        }
+                    </Col>
+                </Row>
+            </Card.Header>
+            <Card.Body className="light-grey-bg">
+                <Card.Text className="d-flex justify-content-start">{reply.body}</Card.Text>
+                {
+                        userStatus.isAuthenticated
+                        ?
+                            <div className="d-flex justify-content-end">
+                                <Button variant='outline-success' className="button-plain" onClick={handleLike}>
+                                    {
+                                        like
+                                        ? <FontAwesomeIcon icon={regular('thumbs-up')} size='lg'/>
+                                        : <FontAwesomeIcon icon={solid('thumbs-up')} size='lg'/>
+                                    }
+                                    &nbsp;{likes}
+                                </Button>
+                                <Button variant='outline-danger' className="button-plain" onClick={handleDislike}>
+                                    {
+                                        dislike
+                                        ? <FontAwesomeIcon icon={regular('thumbs-down')} size='lg'/>
+                                        : <FontAwesomeIcon icon={solid('thumbs-down')} size='lg'/>
+                                    }
+                                    &nbsp; {dislikes}
+                                </Button>
+                            </div>
+                        : 
+                            <div className="d-flex justify-content-end">
+                                <Button variant='outline-success' className="button-plain">
+                                    <FontAwesomeIcon icon={regular('thumbs-up')} size='lg'/>
+                                    &nbsp;{likes}
+                                </Button>
+                                <Button variant='outline-danger' className=" button-plain">
+                                    <FontAwesomeIcon icon={regular('thumbs-down')} size='lg'/>
+                                    &nbsp;{dislikes}
+                                </Button>
+                                <Button variant='outline-secondary' className="button-plain" >
+                                    <FontAwesomeIcon icon={regular('bookmark')} size='lg'/>
+                                </Button>
+                            </div>
+                    }
+            </Card.Body>
+        </Card>
+    );
+}
+
+
+interface PostCardProps {
+    isRepliesLoading: boolean;
+    errReplies: string;
+    id: number;
+    title: string;
+    body: string;
+    categories: Array<string>
+    likes: number;
+    dislikes: number;
+    saves: number;
+    replies: Array<ReplyInterface>;
+    user_id: number;
+    user: UserInterface
+    created_at: string;
+    updated_at: string;
+}
+
+const PostCard = (props: PostCardProps) => {
     const dispatch = useAppDispatch()
     const navigate = useNavigate();
     
-    const post = props.post;
-    const postId = post.id;
-    const date = new Date(post.created_at);
-    const replies = post.replies
+    const postId = props.id;
+    const date = new Date(props.created_at);
+    const replies = props.replies
 
     const userStatus = useAppSelector(state => state.user);
 
@@ -42,17 +195,19 @@ const PostCard = (props: Props) => {
     const [dislike, setDislike] = useState(false);
     const [save, setSave] = useState(false);
 
-    const [likes, setLikes] = useState(post.likes);
-    const [dislikes, setDislikes] = useState(post.dislikes);
+    const [likes, setLikes] = useState(props.likes);
+    const [dislikes, setDislikes] = useState(props.dislikes);
+
+    const [order, setOrder] = useState(0);
 
     useEffect(() => {
         // check whether post has been liked, disliked or saved
-        if (userStatus.isAuthenticated && post) {
-            setLike(userStatus.liked.find(item => item.id === post.id) === undefined);
-            setDislike(userStatus.disliked.find(item => item.id === post.id) === undefined);
-            setSave(userStatus.saved.find(item => item.id === post.id) === undefined);
+        if (userStatus.isAuthenticated) {
+            setLike(userStatus.liked.find(item => item.id === props.id) === undefined);
+            setDislike(userStatus.disliked.find(item => item.id === props.id) === undefined);
+            setSave(userStatus.saved.find(item => item.id === props.id) === undefined);
         }
-    }, [userStatus, post, params]);
+    }, [userStatus, props]);
 
     // checks whether post has already been liked by user. If so call likePost, otherwise call unlikePost
     const handleLike = () => {
@@ -118,17 +273,27 @@ const PostCard = (props: Props) => {
         }
     }
 
-    const repliesList = replies!.map(reply => {
-        const replyDate = new Date(reply.created_at);
-        return (
-            <Container className="box" key={reply.id}>
-                <Card.Text className="d-flex justify-content-start">{reply.body}</Card.Text>
-                <Card.Text className="d-flex justify-content-end">
-                    @<Link to={`/users/${reply.user!.id}`}>{reply.user!.username}</Link>, {replyDate.toLocaleTimeString() + ", " + replyDate.toLocaleDateString()}
-                </Card.Text>
-            </Container>
-        );
-    }).reverse();
+    const getNewestReplies = () => {
+        setOrder(0);
+        dispatch(fetchPostReplies(postId, 0));
+    }
+
+    const getOldestReplies = () => {
+        setOrder(1);
+        dispatch(fetchPostReplies(postId, 1));
+    }
+
+    const getMostLikesReplies = () => {
+        setOrder(2);
+        dispatch(fetchPostReplies(postId, 2));
+    }
+
+    const getMostDislikesReplies = () => {
+        setOrder(3);
+        dispatch(fetchPostReplies(postId, 3));
+    }
+
+    const repliesList = replies!.map(reply => <Reply reply={reply} key={reply.id}/>);
     
     return (
         <Container className="col-8 mt-3">
@@ -136,7 +301,7 @@ const PostCard = (props: Props) => {
             <Card.Header>
             <Row>
                 <Col className="d-flex justify-content-start">
-                    <Card.Title>{post.title}</Card.Title>
+                    <Card.Title>{props.title}</Card.Title>
                 </Col>
                 <Col className="d-flex justify-content-end">
                     {
@@ -171,11 +336,11 @@ const PostCard = (props: Props) => {
                             <div className="d-flex justify-content-end">
                                 <Button variant='outline-success' className="button-plain">
                                     <FontAwesomeIcon icon={regular('thumbs-up')} size='lg'/>
-                                    &nbsp;{post.likes}
+                                    &nbsp;{likes}
                                 </Button>
                                 <Button variant='outline-danger' className=" button-plain">
                                     <FontAwesomeIcon icon={regular('thumbs-down')} size='lg'/>
-                                    &nbsp;{post.dislikes}
+                                    &nbsp;{dislikes}
                                 </Button>
                                 <Button variant='outline-secondary' className="button-plain" >
                                     <FontAwesomeIcon icon={regular('bookmark')} size='lg'/>
@@ -185,15 +350,15 @@ const PostCard = (props: Props) => {
                 </Col>
             </Row>
                 <Card.Subtitle className="d-flex justify-content-start">
-                    @<Link to={`/users/${post.user!.id}`}>{post.user!.username}</Link>, {date.toLocaleTimeString() + ", " + date.toLocaleDateString()}
+                    @<Link to={`/users/${props.user!.id}`}>{props.user!.username}</Link>, {date.toLocaleTimeString() + ", " + date.toLocaleDateString()}
                 </Card.Subtitle>
-            <Card.Subtitle className="d-flex justify-content-start mt-1">Categories: {post.categories.reduce((x, y) => x + y + ", ", "").slice(0,-2)}</Card.Subtitle>
+            <Card.Subtitle className="d-flex justify-content-start mt-1">Categories: {props.categories.reduce((x, y) => x + y + ", ", "").slice(0,-2)}</Card.Subtitle>
         </Card.Header>
                 <Card.Body>
-                    <Card.Text>{post.body}</Card.Text>
+                    <Card.Text>{props.body}</Card.Text>
                 </Card.Body>
                 <Card.Footer>
-                <Container className="box">
+                    <Container className="box">
                         <Form onSubmit={postForm}>
                             <Form.Group className="mb-3" controlId="formReply">
                                 <Row>
@@ -209,7 +374,26 @@ const PostCard = (props: Props) => {
                             </Form.Group>
                         </Form>
                     </Container>
-                    {repliesList}
+                    <Container className="box">
+                        <Row>
+                            <Container>
+                                <Button variant="primary" className="float-end" onClick={getNewestReplies} active={order === 0}>Newest</Button>
+                                <Button variant="primary" className="float-end me-1" onClick={getOldestReplies} active={order === 1}>Oldest</Button>
+                                <Button variant="primary" className="float-end me-1" onClick={getMostLikesReplies} active={order === 2}>Most Liked</Button>
+                                <Button variant="primary" className="float-end me-1" onClick={getMostDislikesReplies} active={order === 3}>Most Disliked</Button>
+                            </Container>
+                        </Row>
+                    </Container>
+                    {
+                        props.isRepliesLoading
+                        ?
+                            <LoadingSpinner />
+                        : props.errReplies
+                        ?
+                            <Error error={props.errReplies} />
+                        :
+                            repliesList
+                    }
                 </Card.Footer>
             </Card>
         </Container>
@@ -223,28 +407,38 @@ export const Post = () => {
     
     const postId = parseInt(params.postId!)
 
-    const postsStatus = useAppSelector(state => state.posts);
-    const post = postsStatus.posts.find(post => post.id === postId);
+    const postStatus = useAppSelector(state => state.post);
 
     useEffect(() => {
         dispatch(fetchPost(postId));
     }, [dispatch, postId]);
 
-    if (postsStatus.isLoading) {
+    if (postStatus.isPostLoading) {
         return (
             <LoadingSpinner />
         );
-    } else if (postsStatus.err) {
+    } else if (postStatus.errPost) {
         return (
-            <Error error={postsStatus.err} />
+            <Error error={postStatus.errPost} />
         );
-    } else if (post === undefined) {
-        return (
-            <h1 className="mt-3">Post does not exist</h1>
-        )
     } else {
         return (
-            <PostCard post={post} />
+            <PostCard 
+                isRepliesLoading={postStatus.isRepliesLoading}
+                errReplies={postStatus.errReplies!}
+                id={postStatus.id!}
+                title={postStatus.title!}
+                body={postStatus.body!}
+                categories={postStatus.categories!}
+                likes={postStatus.likes!}
+                dislikes={postStatus.dislikes!}
+                saves={postStatus.saves!}
+                replies={postStatus.replies!}
+                user_id={postStatus.user_id!}
+                user={postStatus.user!}
+                created_at={postStatus.created_at!}
+                updated_at={postStatus.updated_at!}
+            />
         );
     }  
 };

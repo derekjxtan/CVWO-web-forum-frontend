@@ -11,7 +11,7 @@ import Form from "react-bootstrap/Form";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { solid } from "@fortawesome/fontawesome-svg-core/import.macro";
 
-import { editReply } from "../reducers/postsSlice";
+import { editReply } from "../reducers/postSlice";
 import { fetchProfile } from "../reducers/profileSlice";
 
 import { ReplyInterface } from "../app/interfaces";

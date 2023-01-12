@@ -11,7 +11,7 @@ interface ProfileState {
 }
 
 const initialState: ProfileState = {
-    isLoading: false,
+    isLoading: true,
     err: null,
     profile: null
 }

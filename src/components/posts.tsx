@@ -8,7 +8,6 @@ import Card  from "react-bootstrap/Card";
 import Col  from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
 import Button from "react-bootstrap/Button";
-import Container from "react-bootstrap/Container";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { solid, regular } from "@fortawesome/fontawesome-svg-core/import.macro";
@@ -189,44 +188,8 @@ interface PostsProps {
 export const Posts = (props: PostsProps) => {
     const dispatch = useAppDispatch();
 
-    const [order, setOrder] = useState(0);
-
     const posts = props.posts;
     const userStatus = useAppSelector(state => state.user);
-
-    // update order state
-    const sortLatest = () => {
-        if (order !== 0) {
-            setOrder(0);
-            sortPosts();
-        } 
-    }
-
-    // update order state
-    const sortEarliest = () => {
-        if (order !== 1) {
-            setOrder(1);
-            sortPosts();
-        } 
-    }
-
-    // sorts posts array in selected order
-    const sortPosts = () => {
-        const postCopy = JSON.parse(JSON.stringify(posts))
-        // Latest to Earliest by date
-        if (order === 0) {
-            postCopy.sort((a: PostInterface, b: PostInterface) => {
-                return Date.parse(b.created_at) - Date.parse(a.created_at);
-            });
-        }
-        // Earliest to Latest by date
-        else {
-            postCopy.sort((a: PostInterface, b: PostInterface) => {
-                return Date.parse(a.created_at) - Date.parse(b.created_at);
-            });
-        }
-        return postCopy;
-    }
 
     // checks whether post has already been liked by user. If so call likePost, otherwise call unlikePost
     const handleLike = (post_id: number, like: boolean) => {
@@ -262,7 +225,7 @@ export const Posts = (props: PostsProps) => {
         dispatch(deletePost(post_id));
     }
 
-    const postsList = sortPosts().map((post: PostInterface) => 
+    const postsList = posts.map((post: PostInterface) => 
         <SinglePost post={post} 
             handleLike={handleLike} 
             handleDislike={handleDislike} 
@@ -272,16 +235,8 @@ export const Posts = (props: PostsProps) => {
     );
 
     return (
-        <Col lg={8} xs={12} className='container mt-3'>
-            <Row>
-                <Container>
-                    <Button variant="primary" className="float-end" onClick={sortEarliest} active={order === 1}>Earliest</Button>
-                    <Button variant="primary" className="float-end me-1" onClick={sortLatest} active={order === 0}>Latest</Button>
-                </Container>
-            </Row>
-            <Container>
-                {postsList}
-            </Container>
-        </Col>
+        <div>
+            {postsList}
+        </div>
     )
 }

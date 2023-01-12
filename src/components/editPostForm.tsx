@@ -11,7 +11,8 @@ import Form from "react-bootstrap/Form";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { solid } from "@fortawesome/fontawesome-svg-core/import.macro";
 
-import { editPost, fetchPost } from "../reducers/postsSlice";
+import { editPost } from "../reducers/postsSlice";
+import { fetchPost } from "../reducers/postSlice";
 
 import { LoadingSpinner } from "./loading";
 import { Error } from "./error";

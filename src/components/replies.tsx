@@ -9,7 +9,7 @@ import Card from 'react-bootstrap/Card';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { solid } from "@fortawesome/fontawesome-svg-core/import.macro";
 
-import { deleteReply } from '../reducers/postsSlice';
+import { deleteReply } from '../reducers/postSlice';
 
 import { ReplyInterface } from '../app/interfaces';
 
@@ -59,10 +59,8 @@ export const Replies = (props: Props) => {
     const repliesList = replies.map(reply => (singleReply(reply)));
 
     return (
-        <Container className="col-8 mt-3">
-            <Container>
-                {repliesList}
-            </Container>
+        <Container>
+            {repliesList}
         </Container>
     )
 }
