@@ -15,7 +15,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { solid, regular } from "@fortawesome/fontawesome-svg-core/import.macro";
 
 import { likePost, unlikePost, dislikePost, undislikePost, savePost, unsavePost } from "../reducers/postsSlice";
-import { deleteReply, dislikeReply, fetchPost, fetchPostReplies, likeReply, postNewReply, undislikeReply, unlikeReply } from "../reducers/postSlice";
+import { deleteReply, dislikeReply, fetchPost, fetchPostReplies, fetchSubReplies, likeReply, postNewReply, undislikeReply, unlikeReply } from "../reducers/postSlice";
 
 import { LoadingSpinner } from "./loading";
 import { Error } from "./error";
@@ -25,6 +25,10 @@ import { ReplyInterface, UserInterface } from "../app/interfaces";
 
 interface ReplyProps {
     reply: ReplyInterface;
+    post_id: number;
+    depth: number;
+    reply_order: number;
+    parent_user: string | undefined;
 }
 
 const Reply = (props: ReplyProps) => {
@@ -40,6 +44,11 @@ const Reply = (props: ReplyProps) => {
     const [likes, setLikes] = useState(reply.likes);
     const [dislikes, setDislikes] = useState(reply.dislikes);
 
+    const [toReply, setToReply] = useState(false);
+    const [seeReplies, setSeeReplies] = useState(false);
+    const [repliesLoaded, setRepliesLoaded] = useState(false);
+
+
     useEffect(() => {
         if (userStatus.isAuthenticated) {
             setLike(userStatus.liked_r.find(item => item.id === reply.id) === undefined);
@@ -50,7 +59,8 @@ const Reply = (props: ReplyProps) => {
     // If currently disliked, undislike locally
     // If currently unliked, like locally and send request to backend
     // If currently liked, unlike locally and send request to backend
-    const handleLike = () => {
+    const handleLike = (e: SyntheticEvent) => {
+        e.preventDefault();
         if (like && !dislike) {
             setDislikes(dislikes - 1);
             setDislike(true);
@@ -69,7 +79,8 @@ const Reply = (props: ReplyProps) => {
     // If currently liked, unlike locally
     // If currently undisliked, dislike locally and send request to backend
     // If currently disliked, undislike locally and send request to backend
-    const handleDislike = () => {
+    const handleDislike = (e: SyntheticEvent) => {
+        e.preventDefault();
         if (dislike && !like) {
             setLikes(likes - 1);
             setLike(true);
@@ -91,76 +102,211 @@ const Reply = (props: ReplyProps) => {
         navigate(0);
     }
 
+    // opens form to reply to current reply
+    const toggleToReply = () => {
+        setToReply(!toReply);
+    }
+
+    // handle submission of reply form
+    const postForm = (e: SyntheticEvent) => {
+        e.preventDefault();
+        const target = e.target as typeof e.target & {
+            body: {value: string};
+        };
+        if (userStatus.isAuthenticated) {
+            if (repliesLoaded) {
+                dispatch(postNewReply(
+                    target.body.value,
+                    userStatus.id!,
+                    props.post_id,
+                    reply.id,
+                    true
+                ));
+            } else {
+                dispatch(postNewReply(
+                    target.body.value,
+                    userStatus.id!,
+                    props.post_id,
+                    reply.id,
+                    false
+                ));
+                getSubReplies();
+            }
+            toggleToReply();
+        } else {
+            alert("You are not logged in, login before trying again");
+        }
+    }
+
+    // call fetchSubReplies in postSlice
+    const getSubReplies = () => {
+        if (seeReplies === false) {
+            setSeeReplies(true);
+            if (!repliesLoaded) {
+                dispatch(fetchSubReplies(reply.id, props.reply_order));
+                setRepliesLoaded(true);
+            }
+        } else {
+            setSeeReplies(false);
+        }
+    }
+
     const replyDate = new Date(reply.created_at);
 
-    return (
-        <Card className="mt-3">
-            <Card.Header className="rosy-brown-bg">
-                <Row>
-                    <Col lg={5} xs={12} className="d-flex justify-content-start">
+    const subReplies = useAppSelector(state => state.post).replies
+        .filter(r => r.reply_id === reply.id)
+        .map(reply => <Reply reply={reply} post_id={props.post_id} reply_order={props.reply_order} depth={props.depth + 1} parent_user={reply.user?.username} key={reply.id}/>)
+
+    const toParent = (
+        <div>
+            <FontAwesomeIcon icon={solid('reply')} size="sm"/>&nbsp;
+            {props.parent_user}
+        </div>
+    )
+    
+    const header = (
+        <Card.Header className="rosy-brown-bg">
+            <Row>
+                <Col lg={7} xs={12}>
+                    <Row>
                         <Card.Subtitle className="d-flex justify-content-start">
-                            @<Link to={`/users/${reply.user!.id}`}>{reply.user!.username}</Link>, {replyDate.toLocaleTimeString() + ", " + replyDate.toLocaleDateString()}
+                            @<Link to={`/users/${reply.user!.id}`}>{reply.user!.username}</Link>&nbsp;
+                            {
+                                props.depth > 3
+                                ? 
+                                    toParent
+                                :
+                                    <div />
+                            }
                         </Card.Subtitle>
-                    </Col>
-                    <Col lg={7} xs={12} className="d-flex justify-content-end">
+                    </Row>
+                    <Row className="mt-1">
+                        <Card.Subtitle className="d-flex justify-content-start">
+                            {replyDate.toLocaleTimeString() + ", " + replyDate.toLocaleDateString()}
+                        </Card.Subtitle>
+                    </Row>
+                </Col>
+                <Col lg={5} xs={12} className="d-flex justify-content-end">
+                    {
+                        (userStatus.isAuthenticated && userStatus.id === reply.user!.id)
+                        ?
+                            <div>
+                                <Link to={`/users/${userStatus.id}/replies/${reply.id}/edit`} className='btn btn-outline-dark button-plain'>
+                                    <FontAwesomeIcon icon={solid('pen')} size="sm"/>
+                                </Link>
+                                <Button variant='outline-dark' className="button-plain" onClick={handleDelete}>
+                                    <FontAwesomeIcon icon={solid('trash')} size="sm"/>
+                                </Button>
+                            </div>
+                        :
+                            <div></div>
+                    }
+                </Col>
+            </Row>
+        </Card.Header>
+    )
+
+    const body = (
+        <Card.Body className="light-grey-bg">
+            <Card.Text className="d-flex justify-content-start">{reply.body}</Card.Text>
+            {
+                    userStatus.isAuthenticated
+                    ?
+                        <div className="d-flex justify-content-end">
+                            {
+                                reply.replies_count !== 0
+                                ?
+                                    <Button variant="outline-secondary" className="button-plain" onClick={getSubReplies}>See replies</Button>
+                                :
+                                    <div />
+                            }
+                            <Button variant="outline-secondary" className="button-plain" onClick={toggleToReply}>Reply</Button>
+                            <Button variant='outline-success' className="button-plain" onClick={handleLike}>
+                                {
+                                    like
+                                    ? <FontAwesomeIcon icon={regular('thumbs-up')} size='lg'/>
+                                    : <FontAwesomeIcon icon={solid('thumbs-up')} size='lg'/>
+                                }
+                                &nbsp;{likes}
+                            </Button>
+                            <Button variant='outline-danger' className="button-plain" onClick={handleDislike}>
+                                {
+                                    dislike
+                                    ? <FontAwesomeIcon icon={regular('thumbs-down')} size='lg'/>
+                                    : <FontAwesomeIcon icon={solid('thumbs-down')} size='lg'/>
+                                }
+                                &nbsp; {dislikes}
+                            </Button>
+                        </div>
+                    : 
+                        <div className="d-flex justify-content-end">
+                            <Button variant='outline-success' className="button-plain">
+                                <FontAwesomeIcon icon={regular('thumbs-up')} size='lg'/>
+                                &nbsp;{likes}
+                            </Button>
+                            <Button variant='outline-danger' className=" button-plain">
+                                <FontAwesomeIcon icon={regular('thumbs-down')} size='lg'/>
+                                &nbsp;{dislikes}
+                            </Button>
+                            <Button variant='outline-secondary' className="button-plain" >
+                                <FontAwesomeIcon icon={regular('bookmark')} size='lg'/>
+                            </Button>
+                        </div>
+                }
+                {
+                    toReply
+                    ?
+                        <div>
+                            <Form onSubmit={postForm}>
+                                <Form.Group className="mb-3" controlId="formReply">
+                                    <Row>
+                                        <Form.Group className="mb-3" controlId="body">
+                                            <Form.Control as="textarea" placeholder="Reply to the post" rows={3} required/>
+                                        </Form.Group>
+                                        <div className="d-flex justify-content-end">
+                                            <Button type="submit" className="mt-2">
+                                                <FontAwesomeIcon icon={solid('reply')}/> Reply
+                                            </Button>
+                                        </div>
+                                    </Row>
+                                </Form.Group>
+                            </Form>
+                        </div>
+                    :
+                        <div/>
+                }
+        </Card.Body>
+    )
+
+    if (props.depth >= 3) {
+        return (
+            <div>
+                <Card className="mt-3">
+                    {header}
+                    {body}
+                </Card>
+                {subReplies}
+            </div>
+        )
+    } else {
+        return (
+            <Card className="mt-3">
+                {header}
+                {body}
+                <Card.Footer>
+                    <Col lg={11} className="float-end">
                         {
-                            (userStatus.isAuthenticated && userStatus.id === reply.user!.id)
-                            ?
-                                <div>
-                                    <Link to={`/users/${userStatus.id}/replies/${reply.id}/edit`} className='btn btn-outline-dark button-plain'>
-                                        <FontAwesomeIcon icon={solid('pen')} />
-                                    </Link>
-                                    <Button variant='outline-dark' className="button-plain" onClick={handleDelete}>
-                                        <FontAwesomeIcon icon={solid('trash')}/>
-                                    </Button>
-                                </div>
-                            :
-                                <div></div>
+                        seeReplies
+                        ?
+                            subReplies
+                        :
+                            <div/>
                         }
                     </Col>
-                </Row>
-            </Card.Header>
-            <Card.Body className="light-grey-bg">
-                <Card.Text className="d-flex justify-content-start">{reply.body}</Card.Text>
-                {
-                        userStatus.isAuthenticated
-                        ?
-                            <div className="d-flex justify-content-end">
-                                <Button variant='outline-success' className="button-plain" onClick={handleLike}>
-                                    {
-                                        like
-                                        ? <FontAwesomeIcon icon={regular('thumbs-up')} size='lg'/>
-                                        : <FontAwesomeIcon icon={solid('thumbs-up')} size='lg'/>
-                                    }
-                                    &nbsp;{likes}
-                                </Button>
-                                <Button variant='outline-danger' className="button-plain" onClick={handleDislike}>
-                                    {
-                                        dislike
-                                        ? <FontAwesomeIcon icon={regular('thumbs-down')} size='lg'/>
-                                        : <FontAwesomeIcon icon={solid('thumbs-down')} size='lg'/>
-                                    }
-                                    &nbsp; {dislikes}
-                                </Button>
-                            </div>
-                        : 
-                            <div className="d-flex justify-content-end">
-                                <Button variant='outline-success' className="button-plain">
-                                    <FontAwesomeIcon icon={regular('thumbs-up')} size='lg'/>
-                                    &nbsp;{likes}
-                                </Button>
-                                <Button variant='outline-danger' className=" button-plain">
-                                    <FontAwesomeIcon icon={regular('thumbs-down')} size='lg'/>
-                                    &nbsp;{dislikes}
-                                </Button>
-                                <Button variant='outline-secondary' className="button-plain" >
-                                    <FontAwesomeIcon icon={regular('bookmark')} size='lg'/>
-                                </Button>
-                            </div>
-                    }
-            </Card.Body>
-        </Card>
-    );
+                </Card.Footer>
+            </Card>
+        );
+    }
 }
 
 
@@ -293,7 +439,9 @@ const PostCard = (props: PostCardProps) => {
         dispatch(fetchPostReplies(postId, 3));
     }
 
-    const repliesList = replies!.map(reply => <Reply reply={reply} key={reply.id}/>);
+    const repliesList = replies!
+        .filter(reply => reply.reply_id === null)
+        .map(reply => <Reply reply={reply} post_id={postId} reply_order={order} depth={0} parent_user={undefined} key={reply.id}/>);
     
     return (
         <Container className="col-8 mt-3">

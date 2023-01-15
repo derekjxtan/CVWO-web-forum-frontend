@@ -126,11 +126,17 @@ const postSlice = createSlice({
                 errReplies: action.payload,
                 replies: []
             }
+        },
+        addReplies(state, action) {
+            return {
+                ...state,
+                replies: state.replies.concat(action.payload)
+            }
         }
     }
 })
 
-export const { postSuccess, postLoading, postFailed, repliesSuccess, repliesLoading, repliesFailed } = postSlice.actions
+export const { postSuccess, postLoading, postFailed, repliesSuccess, repliesLoading, repliesFailed, addReplies } = postSlice.actions
 
 export default postSlice.reducer
 
@@ -224,15 +230,40 @@ export const fetchPostReplies = (post_id: number, order: number = 0) => (dispatc
     })
 }
 
+
 // functions for replies
 
+// sends attempt to fetch subreplies
+export const fetchSubReplies = (reply_id: number, order: number = 0) => (dispatch: AppDispatch) => {
+    fetch(baseUrl + 'replies/' + reply_id.toString() + '/get_sub_replies/' + orderIntToString(order), {
+        method: 'GET'
+    })
+    .then(response => {
+        if (response.ok) {
+            return response;
+        } else {
+            var err = new Error('Error' + response.status + ": " + response.statusText);
+            err.message = response.statusText;
+            throw err;
+        }
+    })
+    .then(response => response.json())
+    .then(response => {
+        dispatch(addReplies(response));
+    })
+    .catch(err => {
+        console.log(err);
+    })
+}
+
 // sends attempt to create new reply to the backend
-export const postNewReply = (body: string, user_id: number, post_id: number) => (dispatch: AppDispatch) => {
+export const postNewReply = (body: string, user_id: number, post_id: number, reply_id: number | null = null, add: boolean = false) => (dispatch: AppDispatch) => {
     const token = 'Bearer ' + localStorage.getItem('token');
     const newReply = {
         body: body,
         user_id: user_id,
-        post_id: post_id
+        post_id: post_id,
+        reply_id: reply_id
     }
     fetch(baseUrl + 'replies', {
         method: 'POST',
@@ -255,7 +286,9 @@ export const postNewReply = (body: string, user_id: number, post_id: number) => 
     })
     .then(response => response.json())
     .then(response => {
-        // console.log(response);
+        if (add) {
+            dispatch(addReplies(response))
+        }
         return response;
     })
     .catch((err) => {
@@ -439,7 +472,7 @@ export const dislikeReply = (reply_id: number, disliked_r: Array<ReplyInterface>
 // update user locally if successful
 export const undislikeReply = (reply_id: number, disliked_r: Array<ReplyInterface>) => (dispatch: AppDispatch) => {
     const token = 'Bearer ' + localStorage.getItem('token');
-    fetch(baseUrl + 'replies/' + reply_id.toString() + '/like', {
+    fetch(baseUrl + 'replies/' + reply_id.toString() + '/dislike', {
         method: 'DELETE',
         headers: {
             'Authorization': token

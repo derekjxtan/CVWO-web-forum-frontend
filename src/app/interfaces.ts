@@ -27,8 +27,10 @@ export interface ReplyInterface {
     id: number;
     body: string;
     post_id: number;
+    reply_id: number;
     likes: number;
     dislikes: number;
+    replies_count: number;
     created_at: string;
     updated_at: string;
     user?: UserInterface;
