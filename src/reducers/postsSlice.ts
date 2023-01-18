@@ -1,5 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch } from "../app/store";
+import Cookies from "js-cookie";
+
 import { baseUrl } from "./baseUrl";
 
 import { updateUserDisliked, updateUserLiked, updateUserSaved } from "./userSlice";
@@ -129,7 +131,7 @@ export const postNewPost = (title: string, body:string, categories: string, user
     categoriesList = categoriesList.map(x => x.trim());
     categoriesList = categoriesList.filter(x => x !== '');
     // console.log(categories);
-    const token = 'Bearer ' + localStorage.getItem('token');
+    const token = 'Bearer ' + Cookies.get('token');
     const newPost = {
         title: title,
         body: body,
@@ -177,7 +179,7 @@ export const editPost = (post_id: number, title: string, body: string, categorie
     categoriesList = categoriesList.map(x => x.trim());
     categoriesList = categoriesList.filter(x => x !== '');
     // console.log(categories);
-    const token = 'Bearer ' + localStorage.getItem('token');
+    const token = 'Bearer ' + Cookies.get('token');
     const edits = {
         title: title,
         body: body,
@@ -217,7 +219,7 @@ export const editPost = (post_id: number, title: string, body: string, categorie
 
 // sends attempt to delete a post to the backend
 export const deletePost = (post_id: number) => (dispatch: AppDispatch) => {
-    const token = 'Bearer ' + localStorage.getItem('token');
+    const token = 'Bearer ' + Cookies.get('token');
     fetch(baseUrl + 'posts/' + post_id.toString(), {
         method: 'DELETE',
         headers: {
@@ -249,7 +251,7 @@ export const deletePost = (post_id: number) => (dispatch: AppDispatch) => {
 
 // sends attempt to like a post
 export const likePost = (user_id: number, post_id: number, liked: Array<PostInterface>, disliked: Array<PostInterface>) => (dispatch: AppDispatch) => {
-    const token = 'Bearer ' + localStorage.getItem('token');
+    const token = 'Bearer ' + Cookies.get('token');
     const newLike = {
         user_id: user_id,
         post_id: post_id
@@ -291,7 +293,7 @@ export const likePost = (user_id: number, post_id: number, liked: Array<PostInte
 
 // sends attempt to unlike a post
 export const unlikePost = (user_id: number, post_id: number, liked: Array<PostInterface>) => (dispatch: AppDispatch) => {
-    const token = 'Bearer ' + localStorage.getItem('token');
+    const token = 'Bearer ' + Cookies.get('token');
     const like = {
         user_id: user_id,
         post_id: post_id
@@ -325,7 +327,7 @@ export const unlikePost = (user_id: number, post_id: number, liked: Array<PostIn
 
 // sends attempt to dislike a post
 export const dislikePost = (user_id: number, post_id: number, disliked: Array<PostInterface>, liked: Array<PostInterface>) => (dispatch: AppDispatch) => {
-    const token = 'Bearer ' + localStorage.getItem('token');
+    const token = 'Bearer ' + Cookies.get('token');
     const newDislike = {
         user_id: user_id,
         post_id: post_id
@@ -369,7 +371,7 @@ export const dislikePost = (user_id: number, post_id: number, disliked: Array<Po
 
 // sends attempt to unlike a post
 export const undislikePost = (user_id: number, post_id: number, disliked: Array<PostInterface>) => (dispatch: AppDispatch) => {
-    const token = 'Bearer ' + localStorage.getItem('token');
+    const token = 'Bearer ' + Cookies.get('token');
     const dislike = {
         user_id: user_id,
         post_id: post_id
@@ -403,7 +405,7 @@ export const undislikePost = (user_id: number, post_id: number, disliked: Array<
 
 // sends attempt to save a post
 export const savePost = (user_id: number, post_id: number, saved: Array<PostInterface>) => (dispatch: AppDispatch) => {
-    const token = 'Bearer ' + localStorage.getItem('token');
+    const token = 'Bearer ' + Cookies.get('token');
     const newSave = {
         user_id: user_id,
         post_id: post_id
@@ -444,7 +446,7 @@ export const savePost = (user_id: number, post_id: number, saved: Array<PostInte
 
 // sends attempt to unlike a post
 export const unsavePost = (user_id: number, post_id: number, saved: Array<PostInterface>) => (dispatch: AppDispatch) => {
-    const token = 'Bearer ' + localStorage.getItem('token');
+    const token = 'Bearer ' + Cookies.get('token');
     const save = {
         user_id: user_id,
         post_id: post_id

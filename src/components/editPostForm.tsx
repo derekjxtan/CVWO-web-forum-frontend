@@ -29,9 +29,7 @@ export const EditPostForm = () => {
         dispatch(fetchPost(postId));
     }, [dispatch, postId])
 
-    const postsStatus = useAppSelector(state => state.posts);
-    const post = postsStatus.posts.find(post => post.id === postId);
-
+    const postStatus = useAppSelector(state => state.post);
     const userStatus = useAppSelector(state => state.user);
 
     // called when attempting to edit a post
@@ -51,30 +49,30 @@ export const EditPostForm = () => {
         navigate(-1);
     }
 
-    if (postsStatus.isLoading) {
+    if (postStatus.isPostLoading) {
         return (
             <LoadingSpinner />
         );
-    } else if (postsStatus.err) {
+    } else if (postStatus.errPost) {
         return (
-            <Error error={postsStatus.err} />
+            <Error error={postStatus.errPost} />
         );
-    } else if (userStatus.isAuthenticated && post && userStatus.id === post.user_id) {
+    } else if (userStatus.isAuthenticated && userStatus.id === postStatus.user_id) {
         return (
             <Container className="col-8">
                 <h1 className="white-text">Edit Thread</h1>
                 <Form onSubmit={handleEdit}>
                     <Form.Group className="mb-3" controlId="title">
                         <Form.Label className="float-start white-text">Title</Form.Label>
-                        <Form.Control type="text" placeholder="Title" defaultValue={post.title} required/>
+                        <Form.Control type="text" placeholder="Title" defaultValue={postStatus.title!} required/>
                     </Form.Group>
                     <Form.Group className="mb-3" controlId="body">
                         <Form.Label className="float-start white-text">Body Text</Form.Label>
-                        <Form.Control as="textarea" rows={10} placeholder="Text" defaultValue={post.body}/>
+                        <Form.Control as="textarea" rows={10} placeholder="Text" defaultValue={postStatus.body!}/>
                     </Form.Group>
                     <Form.Group className="mb-3" controlId="categories">
                         <Form.Label className="float-start white-text">Categories</Form.Label>
-                        <Form.Control type="text" placeholder="categories" defaultValue={post.categories.reduce((x, y) => x + y + " ", "")}/>
+                        <Form.Control type="text" placeholder="categories" defaultValue={postStatus.categories.reduce((x, y) => x + y + " ", "")}/>
                         <Form.Text className="float-start white-text">Enter categories separated with a space</Form.Text>
                     </Form.Group>
                     <Button variant="secondary" className="float-end" onClick={handleCancel}>

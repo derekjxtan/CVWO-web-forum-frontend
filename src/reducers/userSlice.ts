@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import Cookies from "js-cookie";
 import { PostInterface, ReplyInterface } from "../app/interfaces";
 import { AppDispatch } from "../app/store";
 import { baseUrl } from "./baseUrl";
@@ -171,8 +172,8 @@ export default userSlice.reducer
 // checks login status from local storage
 // loads stored data into the store if user has already logged in
 export const checkLogin = () => (dispatch: AppDispatch) => {
-    const loginStatus = localStorage.getItem('isAuthenticated');
-    if (loginStatus === "true") {
+    const token = Cookies.get('token');
+    if (token !== undefined) {
         dispatch(userSuccess({
             id: parseInt(localStorage.getItem('id')!),
             username: localStorage.getItem('username')!,
@@ -184,6 +185,8 @@ export const checkLogin = () => (dispatch: AppDispatch) => {
             liked_r: JSON.parse(localStorage.getItem('liked_r')!),
             disliked_r: JSON.parse(localStorage.getItem('disliked_r')!)
         }));
+    } else if (localStorage.getItem("isAuthenticated") === "true") {
+        dispatch(logout());
     }
     // console.log("checkLogin Called");
 }
@@ -217,7 +220,7 @@ export const login = (username: string, password: string) => (dispatch: AppDispa
     })
     .then((response) => response.json())
     .then((response) => {
-        localStorage.setItem('token', response.token);
+        Cookies.set("token", response.token, { expires: 1});
         dispatch(userSuccess({
             id: parseInt(response.user.id),
             username: response.user.username,
@@ -238,7 +241,7 @@ export const login = (username: string, password: string) => (dispatch: AppDispa
 // logs user out from account
 // overrides data in the store and local storage
 export const logout = () => (dispatch: AppDispatch) => {
-    localStorage.setItem('token', "null");
+    Cookies.remove('token');
     dispatch(removeUser())
 }
 

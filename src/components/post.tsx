@@ -240,6 +240,13 @@ const Reply = (props: ReplyProps) => {
                         </div>
                     : 
                         <div className="d-flex justify-content-end">
+                            {
+                                reply.replies_count !== 0
+                                ?
+                                    <Button variant="outline-secondary" className="button-plain" onClick={getSubReplies}>See replies</Button>
+                                :
+                                    <div />
+                            }
                             <Button variant='outline-success' className="button-plain">
                                 <FontAwesomeIcon icon={regular('thumbs-up')} size='lg'/>
                                 &nbsp;{likes}
@@ -285,7 +292,13 @@ const Reply = (props: ReplyProps) => {
                     {header}
                     {body}
                 </Card>
-                {subReplies}
+                {
+                seeReplies
+                ?
+                    subReplies
+                :
+                    <div/>
+                }
             </div>
         )
     } else {
@@ -506,22 +519,29 @@ const PostCard = (props: PostCardProps) => {
                     <Card.Text>{props.body}</Card.Text>
                 </Card.Body>
                 <Card.Footer>
-                    <Container className="box">
-                        <Form onSubmit={postForm}>
-                            <Form.Group className="mb-3" controlId="formReply">
-                                <Row>
-                                    <Form.Group className="mb-3" controlId="body">
-                                        <Form.Control as="textarea" placeholder="Reply to the post" rows={5} required/>
+                    {
+                        userStatus.isAuthenticated
+                        ?
+                            <Container className="box">
+                                <Form onSubmit={postForm}>
+                                    <Form.Group className="mb-3" controlId="formReply">
+                                        <Row>
+                                            <Form.Group className="mb-3" controlId="body">
+                                                <Form.Control as="textarea" placeholder="Reply to the post" rows={5} required/>
+                                            </Form.Group>
+                                            <div className="d-flex justify-content-end">
+                                                <Button type="submit" className="mt-2">
+                                                    <FontAwesomeIcon icon={solid('reply')}/> Reply
+                                                </Button>
+                                            </div>
+                                        </Row>
                                     </Form.Group>
-                                    <div className="d-flex justify-content-end">
-                                        <Button type="submit" className="mt-2">
-                                            <FontAwesomeIcon icon={solid('reply')}/> Reply
-                                        </Button>
-                                    </div>
-                                </Row>
-                            </Form.Group>
-                        </Form>
-                    </Container>
+                                </Form>
+                            </Container>
+                        :
+                            <div />
+                    }
+                    
                     <Container className="box">
                         <Row>
                             <Container>

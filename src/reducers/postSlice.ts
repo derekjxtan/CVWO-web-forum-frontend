@@ -1,5 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+import Cookies from "js-cookie";
+
 import { ReplyInterface, UserInterface } from "../app/interfaces";
 
 import { AppDispatch } from "../app/store";
@@ -258,7 +260,7 @@ export const fetchSubReplies = (reply_id: number, order: number = 0) => (dispatc
 
 // sends attempt to create new reply to the backend
 export const postNewReply = (body: string, user_id: number, post_id: number, reply_id: number | null = null, add: boolean = false) => (dispatch: AppDispatch) => {
-    const token = 'Bearer ' + localStorage.getItem('token');
+    const token = 'Bearer ' + Cookies.get('token');
     const newReply = {
         body: body,
         user_id: user_id,
@@ -300,7 +302,7 @@ export const postNewReply = (body: string, user_id: number, post_id: number, rep
 // send attempt to edit post to the backend
 export const editReply = (reply_id: number, body: string) => (dispatch: AppDispatch) => {
     // console.log(categories);
-    const token = 'Bearer ' + localStorage.getItem('token');
+    const token = 'Bearer ' + Cookies.get('token');
     const edits = {
         body: body
     }
@@ -339,7 +341,7 @@ export const editReply = (reply_id: number, body: string) => (dispatch: AppDispa
 
 // sends attempt to delete a reply to the backend
 export const deleteReply = (reply_id: number) => (dispatch: AppDispatch) => {
-    const token = 'Bearer ' + localStorage.getItem('token');
+    const token = 'Bearer ' + Cookies.get('token');
     fetch(baseUrl + 'replies/' + reply_id.toString(), {
         method: 'DELETE',
         headers: {
@@ -372,7 +374,7 @@ export const deleteReply = (reply_id: number) => (dispatch: AppDispatch) => {
 // Sends attempt to like a reply
 // Update user locally if sucessful
 export const likeReply = (reply_id: number, liked_r: Array<ReplyInterface>, disliked_r: Array<ReplyInterface>) => (dispatch: AppDispatch) => {
-    const token = 'Bearer ' + localStorage.getItem('token');
+    const token = 'Bearer ' + Cookies.get('token');
     fetch(baseUrl + 'replies/' + reply_id.toString() + '/like', {
         method: 'POST',
         headers: {
@@ -408,7 +410,7 @@ export const likeReply = (reply_id: number, liked_r: Array<ReplyInterface>, disl
 // Sends attempt to unlike a reply
 // update user locally if sucessful
 export const unlikeReply = (reply_id: number, liked_r: Array<ReplyInterface>) => (dispatch: AppDispatch) => {
-    const token = 'Bearer ' + localStorage.getItem('token');
+    const token = 'Bearer ' + Cookies.get('token');
     fetch(baseUrl + 'replies/' + reply_id.toString() + '/like', {
         method: 'DELETE',
         headers: {
@@ -435,7 +437,7 @@ export const unlikeReply = (reply_id: number, liked_r: Array<ReplyInterface>) =>
 // sends attempt to dislike reply
 // update user locally if sucessful
 export const dislikeReply = (reply_id: number, disliked_r: Array<ReplyInterface>, liked_r: Array<ReplyInterface>) => (dispatch: AppDispatch) => {
-    const token = 'Bearer ' + localStorage.getItem('token');
+    const token = 'Bearer ' + Cookies.get('token');
     fetch(baseUrl + 'replies/' + reply_id.toString() + '/dislike', {
         method: 'POST',
         headers: {
@@ -471,7 +473,7 @@ export const dislikeReply = (reply_id: number, disliked_r: Array<ReplyInterface>
 // send attempt to undislike reply
 // update user locally if successful
 export const undislikeReply = (reply_id: number, disliked_r: Array<ReplyInterface>) => (dispatch: AppDispatch) => {
-    const token = 'Bearer ' + localStorage.getItem('token');
+    const token = 'Bearer ' + Cookies.get('token');
     fetch(baseUrl + 'replies/' + reply_id.toString() + '/dislike', {
         method: 'DELETE',
         headers: {

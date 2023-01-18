@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import Cookies from "js-cookie";
 import { UserInterface } from "../app/interfaces";
 import { AppDispatch } from "../app/store";
 import { baseUrl } from "./baseUrl";
@@ -39,8 +40,8 @@ export default profileSlice.reducer
 // fetch single profile from backend
 export const fetchProfile = (user_id: number) => (dispatch: AppDispatch) => {
     dispatch(profileLoading());
-    const token = 'Bearer ' + localStorage.getItem('token');
-    if (localStorage.getItem('token') !== null && localStorage.getItem('token') !== "null") {
+    const token = 'Bearer ' + Cookies.get('token');
+    if (Cookies.get('token') !== undefined) {
         fetch(baseUrl + 'users/' + user_id.toString(), {
             method: 'GET',
             headers: {
