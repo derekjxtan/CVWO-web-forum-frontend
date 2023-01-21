@@ -457,7 +457,7 @@ const PostCard = (props: PostCardProps) => {
         .map(reply => <Reply reply={reply} post_id={postId} reply_order={order} depth={0} parent_user={undefined} key={reply.id}/>);
     
     return (
-        <Container className="col-8 mt-3">
+        <Container className="col-lg-8 col-xs-12 mt-3">
             <Card className="mt-3">
             <Card.Header>
             <Row>
