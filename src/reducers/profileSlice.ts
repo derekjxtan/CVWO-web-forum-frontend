@@ -92,11 +92,29 @@ const profileSlice = createSlice({
                 ...state,
                 replies: action.payload
             }
+        },
+        updateProfileLiked(state, action) {
+            return {
+                ...state,
+                liked: action.payload
+            }
+        },
+        updateProfileDisliked(state, action) {
+            return {
+                ...state,
+                disliked: action.payload
+            }
+        },
+        updateProfileSaved(state, action) {
+            return {
+                ...state,
+                saved: action.payload
+            }
         }
     }
 })
 
-export const { profileSuccess, profileLoading, profileFailed, updateProfilePosts, updateProfileReplies } = profileSlice.actions
+export const { profileSuccess, profileLoading, profileFailed, updateProfilePosts, updateProfileReplies, updateProfileLiked, updateProfileDisliked, updateProfileSaved } = profileSlice.actions
 
 export default profileSlice.reducer
 

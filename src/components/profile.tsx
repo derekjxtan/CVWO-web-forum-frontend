@@ -11,13 +11,15 @@ import Row from "react-bootstrap/Row";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { solid } from "@fortawesome/fontawesome-svg-core/import.macro";
 
-import { fetchProfile } from "../reducers/profileSlice";
+import { fetchProfile, updateProfileDisliked, updateProfileLiked, updateProfilePosts, updateProfileReplies, updateProfileSaved } from "../reducers/profileSlice";
 
 import { Posts } from "./posts";
 import { Replies } from "./replies";
 
 import { LoadingSpinner } from "./loading";
 import { Error } from "./error";
+import { Container } from "react-bootstrap";
+import { PostInterface, ReplyInterface } from "../app/interfaces";
 
 
 export const Profile = () => {
@@ -28,6 +30,7 @@ export const Profile = () => {
     const profile = useAppSelector(state => state.profile)
 
     const [view, setView] = useState(0);
+    const [order, setOrder] = useState(-1);
 
     useEffect(() => {
         dispatch(fetchProfile(parseInt(params.userId!)));
@@ -60,6 +63,109 @@ export const Profile = () => {
     const displaySaves = () => {
         if (view !== 4) {
             setView(4);
+        }
+    }
+
+    const sort = (order: number = 0) => {
+        // latest
+        if (order === 0) {
+            dispatch(updateProfilePosts(JSON.parse(JSON.stringify(profile.posts)).sort((a: PostInterface, b: PostInterface) => {
+                return Date.parse(b.created_at) - Date.parse(a.created_at);
+            })));
+            dispatch(updateProfileReplies(JSON.parse(JSON.stringify(profile.replies)).sort((a: ReplyInterface, b: ReplyInterface) => {
+                return Date.parse(b.created_at) - Date.parse(a.created_at);
+            })));
+            dispatch(updateProfileLiked(JSON.parse(JSON.stringify(profile.liked)).sort((a: PostInterface, b: PostInterface) => {
+                return Date.parse(b.created_at) - Date.parse(a.created_at);
+            })));
+            dispatch(updateProfileDisliked(JSON.parse(JSON.stringify(profile.disliked)).sort((a: PostInterface, b: PostInterface) => {
+                return Date.parse(b.created_at) - Date.parse(a.created_at);
+            })));
+            dispatch(updateProfileSaved(JSON.parse(JSON.stringify(profile.saved)).sort((a: PostInterface, b: PostInterface) => {
+                return Date.parse(b.created_at) - Date.parse(a.created_at);
+            })));
+        }
+        // earliest 
+        else if (order === 1) {
+            dispatch(updateProfilePosts(JSON.parse(JSON.stringify(profile.posts)).sort((a: PostInterface, b: PostInterface) => {
+                return Date.parse(a.created_at) - Date.parse(b.created_at);
+            })));
+            dispatch(updateProfileReplies(JSON.parse(JSON.stringify(profile.replies)).sort((a: ReplyInterface, b: ReplyInterface) => {
+                return Date.parse(a.created_at) - Date.parse(b.created_at);
+            })));
+            dispatch(updateProfileLiked(JSON.parse(JSON.stringify(profile.liked)).sort((a: PostInterface, b: PostInterface) => {
+                return Date.parse(a.created_at) - Date.parse(b.created_at);
+            })));
+            dispatch(updateProfileDisliked(JSON.parse(JSON.stringify(profile.disliked)).sort((a: PostInterface, b: PostInterface) => {
+                return Date.parse(a.created_at) - Date.parse(b.created_at);
+            })));
+            dispatch(updateProfileSaved(JSON.parse(JSON.stringify(profile.saved)).sort((a: PostInterface, b: PostInterface) => {
+                return Date.parse(a.created_at) - Date.parse(b.created_at);
+            })));
+        }
+        // most liked
+        else if (order === 2) {
+            dispatch(updateProfilePosts(JSON.parse(JSON.stringify(profile.posts)).sort((a: PostInterface, b: PostInterface) => {
+                return b.likes - a.likes;
+            })));
+            dispatch(updateProfileReplies(JSON.parse(JSON.stringify(profile.replies)).sort((a: ReplyInterface, b: ReplyInterface) => {
+                return b.likes - a.likes;
+            })));
+            dispatch(updateProfileLiked(JSON.parse(JSON.stringify(profile.liked)).sort((a: PostInterface, b: PostInterface) => {
+                return b.likes - a.likes;
+            })));
+            dispatch(updateProfileDisliked(JSON.parse(JSON.stringify(profile.disliked)).sort((a: PostInterface, b: PostInterface) => {
+                return b.likes - a.likes;
+            })));
+            dispatch(updateProfileSaved(JSON.parse(JSON.stringify(profile.saved)).sort((a: PostInterface, b: PostInterface) => {
+                return b.likes - a.likes;
+            })));
+        }
+        // most disliked
+        else {
+            dispatch(updateProfilePosts(JSON.parse(JSON.stringify(profile.posts)).sort((a: PostInterface, b: PostInterface) => {
+                return b.dislikes - a.dislikes;
+            })));
+            dispatch(updateProfileReplies(JSON.parse(JSON.stringify(profile.replies)).sort((a: ReplyInterface, b: ReplyInterface) => {
+                return b.dislikes - a.dislikes;
+            })));
+            dispatch(updateProfileLiked(JSON.parse(JSON.stringify(profile.liked)).sort((a: PostInterface, b: PostInterface) => {
+                return b.dislikes - a.dislikes;
+            })));
+            dispatch(updateProfileDisliked(JSON.parse(JSON.stringify(profile.disliked)).sort((a: PostInterface, b: PostInterface) => {
+                return b.dislikes - a.dislikes;
+            })));
+            dispatch(updateProfileSaved(JSON.parse(JSON.stringify(profile.saved)).sort((a: PostInterface, b: PostInterface) => {
+                return b.dislikes - a.dislikes;
+            })));
+        }
+    }
+
+    const getLatest = () => {
+        if (order !== 0) {
+            setOrder(0);
+            sort(0);
+        }
+    }
+
+    const getEarliest = () => {
+        if (order !== 1) {
+            setOrder(1);
+            sort(1);
+        }
+    }
+
+    const getMostLikes = () => {
+        if (order !== 2) {
+            setOrder(2);
+            sort(2);
+        }
+    }
+
+    const getMostDislikes = () => {
+        if (order !== 3) {
+            setOrder(3);
+            sort(3);
         }
     }
 
@@ -104,12 +210,12 @@ export const Profile = () => {
                 }
                 <Col lg={8} xs={12} className='container mt-3'>
                     <Row>
-                        {/* <Container>
-                            <Button variant="primary" className="float-end" onClick={getNewestPosts} active={order === 0}>Newest</Button>
-                            <Button variant="primary" className="float-end me-1" onClick={getOldestPosts} active={order === 1}>Oldest</Button>
-                            <Button variant="primary" className="float-end me-1" onClick={getMostLikesPosts} active={order === 2}>Most Liked</Button>
-                            <Button variant="primary" className="float-end me-1" onClick={getMostDislikesPosts} active={order === 3}>Most Disliked</Button>
-                        </Container> */}
+                        <Container>
+                            <Button variant="primary" className="float-end" onClick={getLatest} active={order === 0}>Newest</Button>
+                            <Button variant="primary" className="float-end me-1" onClick={getEarliest} active={order === 1}>Oldest</Button>
+                            <Button variant="primary" className="float-end me-1" onClick={getMostLikes} active={order === 2}>Most Liked</Button>
+                            <Button variant="primary" className="float-end me-1" onClick={getMostDislikes} active={order === 3}>Most Disliked</Button>
+                        </Container>
                     </Row>
                     {
                         view === 0
