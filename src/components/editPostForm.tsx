@@ -11,11 +11,12 @@ import Form from "react-bootstrap/Form";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { solid } from "@fortawesome/fontawesome-svg-core/import.macro";
 
-import { editPost } from "../reducers/postsSlice";
 import { fetchPost } from "../reducers/postSlice";
 
 import { LoadingSpinner } from "./loading";
 import { Error } from "./error";
+import Cookies from "js-cookie";
+import { baseUrl } from "../reducers/baseUrl";
 
 
 export const EditPostForm = () => {
@@ -40,8 +41,55 @@ export const EditPostForm = () => {
             body: {value: string};
             categories: {value: string}
         };
-        dispatch(editPost(postId, target.title.value, target.body.value, target.categories.value));
-        navigate(-1);
+        // dispatch(editPost(postId, target.title.value, target.body.value, target.categories.value));
+        // navigate(-1);
+        // format categories, split string into array, remove blanks then remove whitespaces for individual entries
+        var categories = target.categories.value.trim();
+        if (categories[categories.length - 1] === ',') {
+            categories = categories.slice(0, -1);
+        }
+        var categoriesList = categories.split(" ");
+        categoriesList = categoriesList.map(x => x.trim());
+        categoriesList = categoriesList.filter(x => x !== '');
+        // console.log(categories);
+        const token = 'Bearer ' + Cookies.get('token');
+        const edits = {
+            title: target.title.value,
+            body: target.body.value,
+            categories: categoriesList
+        }
+        fetch(baseUrl + 'posts/' + postId.toString(), {
+            method: 'PUT',
+            headers: {
+                'Authorization': token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(edits),
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            // console.log(response);
+            if (response.ok) {
+                return response
+            } else {
+                if (response.status === 404) {
+                    alert("Post does not exist");
+                } else {
+                    alert("Error editing post")
+                }
+            }
+        })
+        .then(response => response!.json())
+        .then(response => {
+            // console.log(response);
+            alert("Post edited");
+            navigate(-1);
+            return response;
+        })
+        .catch((err) => {
+            console.log(err);
+            return err;
+        })
     }
 
     // callled when cancel is clicked, navigates to previous page

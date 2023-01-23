@@ -25,8 +25,7 @@ export const Profile = () => {
     const dispatch = useAppDispatch();
 
     const userStatus = useAppSelector(state => state.user)
-    const profileStatus = useAppSelector(state => state.profile)
-    const profile = profileStatus.profile
+    const profile = useAppSelector(state => state.profile)
 
     const [view, setView] = useState(0);
 
@@ -64,7 +63,15 @@ export const Profile = () => {
         }
     }
 
-    if (profile) {
+    if (profile.isLoading) {
+        return (
+            <LoadingSpinner />
+        );
+    } else if (profile.err) {
+        return (
+            <Error error={profile.err}  />
+        );
+    } else {
         return (
             <div>
                 <h1 className="white-text">Profile</h1>
@@ -122,18 +129,6 @@ export const Profile = () => {
                     }
                 </Col>
             </div>
-        )
-    } else if (profileStatus.isLoading) {
-        return (
-            <LoadingSpinner />
-        )
-    } else if (profileStatus.err) {
-        return (
-            <Error error={profileStatus.err}  />
-        )
-    } else {
-        return (
-            <h1 className="mt-3">Login to View</h1>
         )
     }
 }

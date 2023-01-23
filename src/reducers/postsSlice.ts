@@ -159,7 +159,7 @@ export const postNewPost = (title: string, body:string, categories: string, user
     })
     .then(response => response.json())
     .then(response => {
-        // console.log(response);
+        console.log("End of postNewPost");
         return response;
     })
     .catch((err) => {

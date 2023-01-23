@@ -134,11 +134,17 @@ const postSlice = createSlice({
                 ...state,
                 replies: state.replies.concat(action.payload)
             }
+        },
+        updateReplies(state, action) {
+            return {
+                ...state,
+                replies: action.payload
+            }
         }
     }
 })
 
-export const { postSuccess, postLoading, postFailed, repliesSuccess, repliesLoading, repliesFailed, addReplies } = postSlice.actions
+export const { postSuccess, postLoading, postFailed, repliesSuccess, repliesLoading, repliesFailed, addReplies, updateReplies } = postSlice.actions
 
 export default postSlice.reducer
 

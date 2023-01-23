@@ -1,6 +1,6 @@
 import React, { SyntheticEvent } from "react";
 
-import { useAppDispatch, useAppSelector } from "../app/hooks";
+import { useAppSelector } from "../app/hooks";
 
 import { useNavigate } from "react-router-dom";
 
@@ -11,11 +11,12 @@ import Form from "react-bootstrap/Form";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { solid } from "@fortawesome/fontawesome-svg-core/import.macro";
 
-import { postNewPost } from "../reducers/postsSlice";
+import Cookies from "js-cookie";
+
+import { baseUrl } from "../reducers/baseUrl";
 
 
 export const NewPostForm = () => {
-    const dispatch = useAppDispatch();
     const navigate = useNavigate();
 
     const userStatus = useAppSelector(state => state.user)
@@ -29,13 +30,47 @@ export const NewPostForm = () => {
             categories: {value: string};
         };
         if (userStatus.isAuthenticated) {
-            dispatch(postNewPost(
-                target.title.value, 
-                target.body.value,
-                target.categories.value, 
-                userStatus.id!
-            ));
-            navigate(-1)
+            // format categories, split string into array, remove blanks then remove whitespaces for individual entries
+            var categories = target.categories.value.trim();
+            if (categories[categories.length - 1] === ',') {
+                categories = categories.slice(0, -1);
+            }
+            var categoriesList = categories.split(" ");
+            categoriesList = categoriesList.map(x => x.trim());
+            categoriesList = categoriesList.filter(x => x !== '');
+            const token = 'Bearer ' + Cookies.get('token');
+            const newPost = {
+                title: target.title.value,
+                body: target.body.value,
+                categories: categoriesList,
+                user_id: userStatus.id
+            }
+            fetch(baseUrl + 'posts', {
+                method: 'POST',
+                headers: {
+                    'Authorization': token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newPost),
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response
+                } else {
+                    var err = new Error('Error' + response.status + ": " + response.statusText);
+                    err.message = response.statusText;
+                    throw err;
+                }
+            })
+            .then(response => {
+                navigate(-1);
+                return response;
+            })
+            .catch((err) => {
+                alert("Failed to submit new post. Please try again");
+                return err;
+            })
         } else {
             alert("You are not logged in, login before trying again");
         }

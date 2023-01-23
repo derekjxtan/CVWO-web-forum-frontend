@@ -12,9 +12,12 @@ import Button from "react-bootstrap/Button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { solid, regular } from "@fortawesome/fontawesome-svg-core/import.macro";
 
-import { likePost, unlikePost, dislikePost, undislikePost, savePost, unsavePost, deletePost } from "../reducers/postsSlice";
+import { likePost, unlikePost, dislikePost, undislikePost, savePost, unsavePost, postsSuccess } from "../reducers/postsSlice";
+import { updateProfilePosts } from "../reducers/profileSlice";
 
 import { PostInterface } from "../app/interfaces";
+import Cookies from "js-cookie";
+import { baseUrl } from "../reducers/baseUrl";
 
 
 interface SinglePostProps {
@@ -190,6 +193,7 @@ export const Posts = (props: PostsProps) => {
 
     const posts = props.posts;
     const userStatus = useAppSelector(state => state.user);
+    const profile = useAppSelector(state => state.profile);
 
     // checks whether post has already been liked by user. If so call likePost, otherwise call unlikePost
     const handleLike = (post_id: number, like: boolean) => {
@@ -222,7 +226,36 @@ export const Posts = (props: PostsProps) => {
     // dispatches deletePost function from postsSlice
     const handleDelete = (post_id: number) => {
         alert("Deleting post " + post_id);
-        dispatch(deletePost(post_id));
+        // dispatch(deletePost(post_id));
+        const token = 'Bearer ' + Cookies.get('token');
+        fetch(baseUrl + 'posts/' + post_id.toString(), {
+            method: 'DELETE',
+            headers: {
+                'Authorization': token
+            }
+        })
+        .then(response => {
+            // console.log(response);
+            if (response.ok) {
+                alert("Post sucessfully deleted");
+                dispatch(postsSuccess(posts.filter(post => post.id !== post_id)));
+                dispatch(updateProfilePosts(profile.posts.filter(post => post.id !== post_id)));
+                return response
+            } else {
+                if (response.status === 404) {
+                    alert("Post does not exist");
+                } else {
+                    alert("Error deleting post")
+                }
+                var err = new Error('Error' + response.status + ": " + response.statusText);
+                err.message = response.statusText;
+                throw err;
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+            return err;
+        })
     }
 
     const postsList = posts.map((post: PostInterface) => 

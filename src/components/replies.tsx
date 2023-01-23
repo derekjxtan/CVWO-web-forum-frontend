@@ -9,9 +9,11 @@ import Card from 'react-bootstrap/Card';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { solid } from "@fortawesome/fontawesome-svg-core/import.macro";
 
-import { deleteReply } from '../reducers/postSlice';
+import { updateProfileReplies } from '../reducers/profileSlice';
 
 import { ReplyInterface } from '../app/interfaces';
+import Cookies from 'js-cookie';
+import { baseUrl } from '../reducers/baseUrl';
 
 
 interface Props {
@@ -28,8 +30,34 @@ export const Replies = (props: Props) => {
     // dispatches deleteReply function from postsSlice
     const handleDelete = (reply_id: number) => {
         alert("Deleting reply " + reply_id);
-        dispatch(deleteReply(reply_id));
-        navigate(0);
+        const token = 'Bearer ' + Cookies.get('token');
+        fetch(baseUrl + 'replies/' + reply_id.toString(), {
+            method: 'DELETE',
+            headers: {
+                'Authorization': token
+            }
+        })
+        .then(response => {
+            // console.log(response);
+            if (response.ok) {
+                alert("Reply sucessfully deleted");
+                dispatch(updateProfileReplies(replies.filter(reply => reply.id !== reply_id)))
+                return response
+            } else {
+                if (response.status === 404) {
+                    alert("Reply does not exist");
+                } else {
+                    alert("Error deleting post");
+                }
+                var err = new Error('Error' + response.status + ": " + response.statusText);
+                err.message = response.statusText;
+                throw err;
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+            return err;
+        })
     }
 
     const singleReply = (reply: ReplyInterface) => (

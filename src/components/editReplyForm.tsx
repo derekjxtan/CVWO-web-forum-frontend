@@ -29,7 +29,7 @@ export const EditReplyForm = () => {
         dispatch(fetchProfile(userId));
     }, [dispatch, userId])
 
-    const profile = useAppSelector(state => state.profile.profile);
+    const profile = useAppSelector(state => state.profile);
     const userStatus = useAppSelector(state => state.user)
 
     // called when attempting to edit a post

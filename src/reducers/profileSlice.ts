@@ -1,39 +1,117 @@
 import { createSlice } from "@reduxjs/toolkit";
 import Cookies from "js-cookie";
-import { UserInterface } from "../app/interfaces";
+import { PostInterface, ReplyInterface, UserInterface } from "../app/interfaces";
 import { AppDispatch } from "../app/store";
 import { baseUrl } from "./baseUrl";
 
 
+// interface ProfileState {
+//     isLoading: boolean;
+//     err: string | null;
+//     profile: UserInterface | null;
+// }
+
 interface ProfileState {
     isLoading: boolean;
     err: string | null;
-    profile: UserInterface | null;
+    id: number | null;
+    username: string | null;
+    posts: Array<PostInterface>;
+    replies: Array<ReplyInterface>;
+    liked: Array<PostInterface>;
+    disliked: Array<PostInterface>;
+    saved: Array<PostInterface>;
 }
 
+// const initialState: ProfileState = {
+//     isLoading: true,
+//     err: null,
+//     profile: null
+// }
+
 const initialState: ProfileState = {
-    isLoading: true,
+    isLoading: false,
     err: null,
-    profile: null
+    id: null,
+    username: null,
+    posts: [],
+    replies: [],
+    liked: [],
+    disliked: [],
+    saved: [],
 }
 
 const profileSlice = createSlice({
     name: 'profile',
     initialState,
     reducers: {
+        // profileSuccess(state, action) {
+        //     return {...state, isLoading: false, err: null, profile: action.payload}
+        // },
+        // profileLoading(state) {
+        //     return {...state, isLoading: true, err: null, profile: null}
+        // },
+        // profileFailed(state, action) {
+        //     return {...state, isLoading: false, err: action.payload, profile: null}
+        // },
         profileSuccess(state, action) {
-            return {...state, isLoading: false, err: null, profile: action.payload}
+            return {
+                ...state, 
+                isLoading: false, 
+                err: null, 
+                id: action.payload.id,
+                username: action.payload.username,
+                posts: action.payload.posts,
+                replies: action.payload.replies,
+                liked: action.payload.liked,
+                disliked: action.payload.disliked,
+                saved: action.payload.saved,
+            }
         },
         profileLoading(state) {
-            return {...state, isLoading: true, err: null, profile: null}
+            return {
+                ...state, 
+                isLoading: true, 
+                err: null,
+                id: null,
+                username: null,
+                posts: [],
+                replies: [],
+                liked: [],
+                disliked: [],
+                saved: [],
+            }
         },
         profileFailed(state, action) {
-            return {...state, isLoading: false, err: action.payload, profile: null}
+            return {
+                ...state, 
+                isLoading: false, 
+                err: action.payload,
+                id: null,
+                username: null,
+                posts: [],
+                replies: [],
+                liked: [],
+                disliked: [],
+                saved: [],
+            }
+        },
+        updateProfilePosts(state, action) {
+            return {
+                ...state,
+                posts: action.payload
+            }
+        },
+        updateProfileReplies(state, action) {
+            return {
+                ...state,
+                replies: action.payload
+            }
         }
     }
 })
 
-export const { profileSuccess, profileLoading, profileFailed } = profileSlice.actions
+export const { profileSuccess, profileLoading, profileFailed, updateProfilePosts, updateProfileReplies } = profileSlice.actions
 
 export default profileSlice.reducer
 

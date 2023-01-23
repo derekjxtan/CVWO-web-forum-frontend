@@ -15,12 +15,14 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { solid, regular } from "@fortawesome/fontawesome-svg-core/import.macro";
 
 import { likePost, unlikePost, dislikePost, undislikePost, savePost, unsavePost } from "../reducers/postsSlice";
-import { deleteReply, dislikeReply, fetchPost, fetchPostReplies, fetchSubReplies, likeReply, postNewReply, undislikeReply, unlikeReply } from "../reducers/postSlice";
+import { addReplies, dislikeReply, fetchPost, fetchPostReplies, fetchSubReplies, likeReply, postNewReply, undislikeReply, unlikeReply, updateReplies } from "../reducers/postSlice";
 
 import { LoadingSpinner } from "./loading";
 import { Error } from "./error";
 
 import { ReplyInterface, UserInterface } from "../app/interfaces";
+import Cookies from "js-cookie";
+import { baseUrl } from "../reducers/baseUrl";
 
 
 interface ReplyProps {
@@ -36,6 +38,7 @@ const Reply = (props: ReplyProps) => {
     const navigate = useNavigate();
 
     const userStatus = useAppSelector(state => state.user);
+    const replies = useAppSelector(state => state.post).replies;
     const reply = props.reply
 
     const [like, setLike] = useState(false);
@@ -98,8 +101,33 @@ const Reply = (props: ReplyProps) => {
 
     // calls deleteReply
     const handleDelete = () => {
-        dispatch(deleteReply(reply.id));
-        navigate(0);
+        // dispatch(deleteReply(reply.id));
+        // navigate(0);
+        const token = 'Bearer ' + Cookies.get('token');
+        fetch(baseUrl + 'replies/' + reply.id.toString(), {
+            method: 'DELETE',
+            headers: {
+                'Authorization': token
+            }
+        })
+        .then(response => {
+            // console.log(response);
+            if (response.ok) {
+                alert("Reply sucessfully deleted");
+                dispatch(updateReplies(replies.filter(r => r.id !== reply.id && r.reply_id !== reply.id)));
+                return response
+            } else {
+                if (response.status === 404) {
+                    alert("Reply does not exist");
+                } else {
+                    alert("Error deleting post");
+                }
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+            return err;
+        })
     }
 
     // opens form to reply to current reply
@@ -114,24 +142,43 @@ const Reply = (props: ReplyProps) => {
             body: {value: string};
         };
         if (userStatus.isAuthenticated) {
-            if (repliesLoaded) {
-                dispatch(postNewReply(
-                    target.body.value,
-                    userStatus.id!,
-                    props.post_id,
-                    reply.id,
-                    true
-                ));
-            } else {
-                dispatch(postNewReply(
-                    target.body.value,
-                    userStatus.id!,
-                    props.post_id,
-                    reply.id,
-                    false
-                ));
-                getSubReplies();
+            const token = 'Bearer ' + Cookies.get('token');
+            const newReply = {
+                body: target.body.value,
+                user_id: userStatus.id,
+                post_id: props.post_id,
+                reply_id: reply.id
             }
+            fetch(baseUrl + 'replies', {
+                method: 'POST',
+                headers: {
+                    'Authorization': token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newReply),
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                // console.log(response);
+                if (response.ok) {
+                    return response
+                } else {
+                    alert("Error posting reply");
+                }
+            })
+            .then(response => response!.json())
+            .then(response => {
+                if (!repliesLoaded) {
+                    getSubReplies();
+                } else {
+                    dispatch(addReplies(response));
+                }
+                return response;
+            })
+            .catch((err) => {
+                console.log(err);
+                return err;
+            })
             toggleToReply();
         } else {
             alert("You are not logged in, login before trying again");
@@ -420,12 +467,38 @@ const PostCard = (props: PostCardProps) => {
             body: {value: string};
         };
         if (userStatus.isAuthenticated) {
-            dispatch(postNewReply(
-                target.body.value,
-                userStatus.id!,
-                postId
-            ));
-            navigate(0);
+            const token = 'Bearer ' + Cookies.get('token');
+            const newReply = {
+                body: target.body.value,
+                user_id: userStatus.id,
+                post_id: postId,
+            }
+            fetch(baseUrl + 'replies', {
+                method: 'POST',
+                headers: {
+                    'Authorization': token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newReply),
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                // console.log(response);
+                if (response.ok) {
+                    return response
+                } else {
+                    alert("Error posting reply");
+                }
+            })
+            .then(response => response!.json())
+            .then(response => {
+                navigate(0);
+                return response;
+            })
+            .catch((err) => {
+                console.log(err);
+                return err;
+            })
         } else {
             alert("You are not logged in, login before trying again");
             navigate(0);
