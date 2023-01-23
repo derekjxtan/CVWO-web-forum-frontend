@@ -186,26 +186,30 @@ export const Profile = () => {
                     userStatus.isAuthenticated && profile.id === userStatus.id
                     ?
                         <div>
-                            <Button variant="primary" active={view===0} onClick={displayPosts}>
+                            <Button active={view===0} className="header-button" onClick={displayPosts}>
                                 <FontAwesomeIcon icon={solid('rectangle-list')}/> Posts
                             </Button>
-                            <Button variant="primary" active={view===1} className="ms-2" onClick={displayReplies}>
+                            <Button active={view===1} className=" header-button ms-2" onClick={displayReplies}>
                                 <FontAwesomeIcon icon={solid('reply')}/> Replies
                             </Button>
-                            <Button variant="primary" active={view===2} className="ms-2" onClick={displayLikes}>
+                            <Button active={view===2} className="header-button ms-2" onClick={displayLikes}>
                                 <FontAwesomeIcon icon={solid('thumbs-up')}/> Liked
                             </Button>
-                            <Button variant="primary" active={view===3} className="ms-2" onClick={displayDislikes}>
+                            <Button active={view===3} className="header-button ms-2" onClick={displayDislikes}>
                                 <FontAwesomeIcon icon={solid('thumbs-down')}/> Disliked
                             </Button>
-                            <Button variant="primary" active={view===4} className="ms-2" onClick={displaySaves}>
+                            <Button active={view===4} className="header-button ms-2" onClick={displaySaves}>
                                 <FontAwesomeIcon icon={solid('bookmark')}/> Saved
                             </Button>
                         </div>
                     :  
                         <div>
-                            <Button variant="primary" active={view===0} onClick={displayPosts}>Posts</Button>
-                            <Button variant="primary" active={view===1} className="ms-2" onClick={displayReplies}>Replies</Button>
+                            <Button active={view===0} className="header-button" onClick={displayPosts}>
+                                <FontAwesomeIcon icon={solid('rectangle-list')}/> PostsPosts
+                            </Button>
+                            <Button active={view===1} className="header-button ms-2" onClick={displayReplies}>
+                                <FontAwesomeIcon icon={solid('reply')}/> Replies
+                            </Button>
                         </div>
                 }
                 <Col lg={8} xs={12} className='container mt-3'>

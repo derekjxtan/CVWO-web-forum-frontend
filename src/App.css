@@ -111,3 +111,9 @@
 .white-text {
   color: white !important;
 }
+
+.header-button {
+  background-color: #eef36a !important;
+  border: none !important;
+  color: black !important;
+}
