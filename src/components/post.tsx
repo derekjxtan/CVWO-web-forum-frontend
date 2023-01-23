@@ -15,7 +15,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { solid, regular } from "@fortawesome/fontawesome-svg-core/import.macro";
 
 import { likePost, unlikePost, dislikePost, undislikePost, savePost, unsavePost } from "../reducers/postsSlice";
-import { addReplies, dislikeReply, fetchPost, fetchPostReplies, fetchSubReplies, likeReply, postNewReply, undislikeReply, unlikeReply, updateReplies } from "../reducers/postSlice";
+import { addReplies, dislikeReply, fetchPost, fetchPostReplies, fetchSubReplies, likeReply, undislikeReply, unlikeReply, updateReplies } from "../reducers/postSlice";
 
 import { LoadingSpinner } from "./loading";
 import { Error } from "./error";
@@ -35,7 +35,6 @@ interface ReplyProps {
 
 const Reply = (props: ReplyProps) => {
     const dispatch = useAppDispatch();
-    const navigate = useNavigate();
 
     const userStatus = useAppSelector(state => state.user);
     const replies = useAppSelector(state => state.post).replies;

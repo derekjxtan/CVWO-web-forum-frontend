@@ -1,15 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 import Cookies from "js-cookie";
-import { PostInterface, ReplyInterface, UserInterface } from "../app/interfaces";
+import { PostInterface, ReplyInterface } from "../app/interfaces";
 import { AppDispatch } from "../app/store";
 import { baseUrl } from "./baseUrl";
 
-
-// interface ProfileState {
-//     isLoading: boolean;
-//     err: string | null;
-//     profile: UserInterface | null;
-// }
 
 interface ProfileState {
     isLoading: boolean;
@@ -45,15 +39,6 @@ const profileSlice = createSlice({
     name: 'profile',
     initialState,
     reducers: {
-        // profileSuccess(state, action) {
-        //     return {...state, isLoading: false, err: null, profile: action.payload}
-        // },
-        // profileLoading(state) {
-        //     return {...state, isLoading: true, err: null, profile: null}
-        // },
-        // profileFailed(state, action) {
-        //     return {...state, isLoading: false, err: action.payload, profile: null}
-        // },
         profileSuccess(state, action) {
             return {
                 ...state, 

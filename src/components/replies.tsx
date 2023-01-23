@@ -1,6 +1,6 @@
 import { useAppDispatch } from '../app/hooks';
 
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
@@ -22,7 +22,6 @@ interface Props {
 
 export const Replies = (props: Props) => {
     const dispatch = useAppDispatch();
-    const navigate = useNavigate();
 
     const replies = props.replies;
 
