@@ -205,7 +205,7 @@ export const Profile = () => {
                     :  
                         <div>
                             <Button active={view===0} className="header-button" onClick={displayPosts}>
-                                <FontAwesomeIcon icon={solid('rectangle-list')}/> PostsPosts
+                                <FontAwesomeIcon icon={solid('rectangle-list')}/> Posts
                             </Button>
                             <Button active={view===1} className="header-button ms-2" onClick={displayReplies}>
                                 <FontAwesomeIcon icon={solid('reply')}/> Replies
