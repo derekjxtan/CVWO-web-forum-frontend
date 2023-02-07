@@ -3,7 +3,7 @@ This is repo contains the source code for the front end of the CVWO project for 
 
 Name: Tan Jing Xu, Derek\
 Matriculation Number: A0196465N\
-Link to final writeup: https://github.com/derekjxtan/CVWO-web-forum-backend/blob/main/Tan%20Jing%20Xu%20Derek_A0196465N_FinalWriteup.pdf
+Link to final writeup: https://github.com/derekjxtan/CVWO-web-forum-backend/blob/main/Tan%20Jing%20Xu%20Derek_A0196465N_FinalWriteup.pdf \
 Link to Backend repo: https://github.com/derekjxtan/CVWO-web-forum-backend
 
 ## Link to deployed app on Netlify: https://heartfelt-rugelach-c1701b.netlify.app
